@@ -161,81 +161,46 @@ function RadarChart({ question, data, total }) {
   )
 }
 
-// Donut chart for single-select with few options
+// Donut chart using CSS conic-gradient
 function DonutChart({ question, data, total }) {
   const items = question.options
     .map((opt) => ({ ...opt, ...(data[opt.value] || { count: 0, emails: [] }) }))
     .filter((item) => item.count > 0)
     .sort((a, b) => b.count - a.count)
 
-  const colors = ['var(--brand-green)', 'var(--brand-aqua)', 'var(--brand-blue)', 'var(--brand-teal)', 'var(--brand-dark-green)', '#F2FF69', '#FF6B6B']
-  const size = 200
-  const cx = size / 2
-  const cy = size / 2
-  const outerR = 85
-  const innerR = 55
+  const colorValues = ['#00CE7C', '#00D2C8', '#0069FF', '#007D8A', '#004F3B', '#F2FF69', '#FF6B6B']
 
-  let currentAngle = -Math.PI / 2
-  const arcs = items.map((item, i) => {
-    const pct = total > 0 ? item.count / total : 0
-    const angle = Math.min(pct * 2 * Math.PI, 2 * Math.PI - 0.001) // prevent full circle (SVG arc bug)
-    const startAngle = currentAngle
-    const endAngle = currentAngle + angle
-    currentAngle = endAngle
-
-    // Single item = full ring
-    if (items.length === 1) {
-      const path = [
-        `M${cx},${cy - outerR}`,
-        `A${outerR},${outerR} 0 1 1 ${cx - 0.001},${cy - outerR}`,
-        `M${cx},${cy - innerR}`,
-        `A${innerR},${innerR} 0 1 0 ${cx - 0.001},${cy - innerR}`,
-      ].join(' ')
-      return { ...item, path, color: colors[0], pct: 100 }
-    }
-
-    const largeArc = angle > Math.PI ? 1 : 0
-    const x1o = cx + outerR * Math.cos(startAngle)
-    const y1o = cy + outerR * Math.sin(startAngle)
-    const x2o = cx + outerR * Math.cos(endAngle)
-    const y2o = cy + outerR * Math.sin(endAngle)
-    const x1i = cx + innerR * Math.cos(endAngle)
-    const y1i = cy + innerR * Math.sin(endAngle)
-    const x2i = cx + innerR * Math.cos(startAngle)
-    const y2i = cy + innerR * Math.sin(startAngle)
-
-    const path = [
-      `M${x1o},${y1o}`,
-      `A${outerR},${outerR} 0 ${largeArc} 1 ${x2o},${y2o}`,
-      `L${x1i},${y1i}`,
-      `A${innerR},${innerR} 0 ${largeArc} 0 ${x2i},${y2i}`,
-      'Z',
-    ].join(' ')
-
-    return { ...item, path, color: colors[i % colors.length], pct: Math.round(pct * 100) }
+  // Build conic-gradient stops
+  let cumPct = 0
+  const stops = []
+  const itemsWithColor = items.map((item, i) => {
+    const pct = total > 0 ? (item.count / total) * 100 : 0
+    const color = colorValues[i % colorValues.length]
+    stops.push(`${color} ${cumPct}% ${cumPct + pct}%`)
+    cumPct += pct
+    return { ...item, color, pct: Math.round(pct) }
   })
+
+  const gradient = stops.length > 0
+    ? `conic-gradient(from 0deg, ${stops.join(', ')})`
+    : 'conic-gradient(rgba(0,53,59,0.1) 0% 100%)'
 
   return (
     <div className="result-question">
       <h3 className="result-question__title">{question.title}</h3>
       <div className="donut-container">
-        <svg viewBox={`0 0 ${size} ${size}`} className="donut-svg">
-          {arcs.map((arc, i) => (
-            <path key={i} d={arc.path} fill={arc.color} fillRule={items.length === 1 ? 'evenodd' : 'nonzero'} />
-          ))}
-          <text x={cx} y={cy - 8} textAnchor="middle" fill="var(--color-text)" fontSize="28" fontWeight="700" fontFamily="var(--font-headline)">
-            {total}
-          </text>
-          <text x={cx} y={cy + 14} textAnchor="middle" fill="var(--brand-teal)" fontSize="11">
-            responses
-          </text>
-        </svg>
+        <div className="donut-ring" style={{ background: gradient }}>
+          <div className="donut-ring__hole">
+            <div className="donut-ring__number">{total}</div>
+            <div className="donut-ring__label">responses</div>
+          </div>
+        </div>
         <div className="donut-legend">
-          {arcs.map((arc, i) => (
+          {itemsWithColor.map((item, i) => (
             <div key={i} className="donut-legend__item">
-              <span className="donut-legend__swatch" style={{ background: arc.color }} />
-              <span className="donut-legend__label">{arc.label}</span>
-              <span className="donut-legend__count">{arc.count} ({arc.pct}%)</span>
+              <span className="donut-legend__swatch" style={{ background: item.color }} />
+              <span className="donut-legend__label">{item.label}</span>
+              <span className="donut-legend__count">{item.count} ({item.pct}%)</span>
             </div>
           ))}
         </div>
