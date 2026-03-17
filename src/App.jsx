@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
 import { questions, sections } from './questions'
 import { submitSurvey } from './sanity'
 import logo from './assets/logo-symbol.png'
@@ -106,11 +105,11 @@ function validateEmail(email) {
 }
 
 export default function App() {
-  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [emailTouched, setEmailTouched] = useState(false)
   const [answers, setAnswers] = useState({})
   const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState(null)
 
   const emailError = emailTouched ? validateEmail(email) : null
@@ -148,11 +147,30 @@ export default function App() {
 
     try {
       await submitSurvey({ email: email.trim().toLowerCase(), ...answers })
-      navigate('/results')
+      setSubmitted(true)
     } catch (err) {
       setError(`Failed to submit: ${err.message}. Your answers have been saved locally.`)
       setSubmitting(false)
     }
+  }
+
+  if (submitted) {
+    return (
+      <>
+        <header className="survey-header">
+          <div className="survey-header__inner">
+            <img src={logo} alt="T-Rex Tech" className="survey-header__logo" />
+            <span className="survey-header__title">Claude Code Workshop</span>
+          </div>
+        </header>
+        <div className="survey-hero">
+          <div className="survey-hero__inner">
+            <h1>Thank You!</h1>
+            <p>Your responses have been recorded. See you on March 26th!</p>
+          </div>
+        </div>
+      </>
+    )
   }
 
   return (
