@@ -1,0 +1,63 @@
+/* Brand fonts */
+@font-face {
+  font-family: 'Obviously Narrow';
+  src: url('./fonts/Obviously-Narrow_Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Obviously Narrow';
+  src: url('./fonts/Obviously-Narrow_Bold_Italic.woff') format('woff');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  --brand-green: #00CE7C;
+  --brand-blue: #0069FF;
+  --brand-yellow: #F2FF69;
+  --brand-dark-blue: #00353B;
+  --brand-teal: #007D8A;
+  --brand-aqua: #00D2C8;
+  --brand-dark-green: #004F3B;
+  --brand-white: #FFFFFF;
+
+  --color-primary: var(--brand-green);
+  --color-text: var(--brand-dark-blue);
+  --color-text-inverse: var(--brand-white);
+  --color-bg: var(--brand-white);
+  --color-bg-dark: var(--brand-dark-blue);
+  --color-accent: var(--brand-aqua);
+
+  --font-headline: 'Obviously Narrow', 'Arial Narrow', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-body: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}

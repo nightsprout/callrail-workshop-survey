@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
+  <script>
+    // GitHub Pages SPA redirect: convert path to ?route= param
+    var path = window.location.pathname;
+    var search = window.location.search;
+    var hash = window.location.hash;
+    window.location.replace('/' + '?route=' + encodeURIComponent(path) + (search ? '&' + search.slice(1) : '') + hash);
+  </script>
+</head>
+<body>
+  Redirecting...
+</body>
+</html>
