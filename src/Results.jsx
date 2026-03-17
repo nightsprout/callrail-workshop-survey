@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { questions, sections } from './questions'
-import { fetchResults } from './sanity'
+import { fetchResults, fetchQuestions } from './sanity'
 import logo from './assets/logo-symbol.png'
 import './Results.css'
 
@@ -82,6 +82,199 @@ function aggregateResponses(responses) {
   return agg
 }
 
+// Radar/Spider chart for workflow capabilities (Q1)
+function RadarChart({ question, data, total }) {
+  const items = question.options.map((opt) => ({
+    ...opt,
+    ...(data[opt.value] || { count: 0 }),
+  }))
+
+  const n = items.length
+  const size = 280
+  const cx = size / 2
+  const cy = size / 2
+  const maxR = 110
+  const rings = 4
+
+  // Calculate angles — start from top (-90deg)
+  const angleStep = (2 * Math.PI) / n
+  const getPoint = (i, r) => ({
+    x: cx + r * Math.cos(angleStep * i - Math.PI / 2),
+    y: cy + r * Math.sin(angleStep * i - Math.PI / 2),
+  })
+
+  // Background rings
+  const ringPaths = Array.from({ length: rings }, (_, ringIdx) => {
+    const r = maxR * ((ringIdx + 1) / rings)
+    const points = Array.from({ length: n }, (_, i) => getPoint(i, r))
+    return points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ') + ' Z'
+  })
+
+  // Spoke lines
+  const spokes = Array.from({ length: n }, (_, i) => getPoint(i, maxR))
+
+  // Data polygon
+  const dataPoints = items.map((item, i) => {
+    const pct = total > 0 ? item.count / total : 0
+    const r = Math.max(maxR * pct, 8)
+    return getPoint(i, r)
+  })
+  const dataPath = dataPoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ') + ' Z'
+
+  // Labels
+  const labelPoints = items.map((item, i) => {
+    const p = getPoint(i, maxR + 20)
+    const pct = total > 0 ? Math.round((item.count / total) * 100) : 0
+    return { ...p, label: item.label.replace(/\s*\(.*\)/, ''), pct, count: item.count }
+  })
+
+  return (
+    <div className="result-question">
+      <h3 className="result-question__title">{question.title}</h3>
+      <div className="radar-container">
+        <svg viewBox={`0 0 ${size} ${size}`} className="radar-svg">
+          {/* Background rings */}
+          {ringPaths.map((path, i) => (
+            <path key={i} d={path} fill="none" stroke="rgba(0,53,59,0.08)" strokeWidth="1" />
+          ))}
+          {/* Spokes */}
+          {spokes.map((p, i) => (
+            <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="rgba(0,53,59,0.06)" strokeWidth="1" />
+          ))}
+          {/* Data area */}
+          <path d={dataPath} fill="rgba(0,206,124,0.15)" stroke="var(--brand-green)" strokeWidth="2" />
+          {/* Data points */}
+          {dataPoints.map((p, i) => (
+            <circle key={i} cx={p.x} cy={p.y} r="4" fill="var(--brand-green)" />
+          ))}
+        </svg>
+        <div className="radar-labels">
+          {labelPoints.map((p, i) => (
+            <div key={i} className="radar-label" style={{ left: `${(p.x / size) * 100}%`, top: `${(p.y / size) * 100}%` }}>
+              <span className="radar-label__text">{p.label}</span>
+              <span className="radar-label__pct">{p.pct}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Donut chart for single-select with few options
+function DonutChart({ question, data, total }) {
+  const items = question.options
+    .map((opt) => ({ ...opt, ...(data[opt.value] || { count: 0, emails: [] }) }))
+    .filter((item) => item.count > 0)
+    .sort((a, b) => b.count - a.count)
+
+  const colors = ['var(--brand-green)', 'var(--brand-aqua)', 'var(--brand-blue)', 'var(--brand-teal)', 'var(--brand-dark-green)', '#F2FF69', '#FF6B6B']
+  const size = 200
+  const cx = size / 2
+  const cy = size / 2
+  const outerR = 85
+  const innerR = 55
+
+  let currentAngle = -Math.PI / 2
+  const arcs = items.map((item, i) => {
+    const pct = total > 0 ? item.count / total : 0
+    const angle = pct * 2 * Math.PI
+    const startAngle = currentAngle
+    const endAngle = currentAngle + angle
+    currentAngle = endAngle
+
+    const largeArc = angle > Math.PI ? 1 : 0
+    const x1o = cx + outerR * Math.cos(startAngle)
+    const y1o = cy + outerR * Math.sin(startAngle)
+    const x2o = cx + outerR * Math.cos(endAngle)
+    const y2o = cy + outerR * Math.sin(endAngle)
+    const x1i = cx + innerR * Math.cos(endAngle)
+    const y1i = cy + innerR * Math.sin(endAngle)
+    const x2i = cx + innerR * Math.cos(startAngle)
+    const y2i = cy + innerR * Math.sin(startAngle)
+
+    const path = [
+      `M${x1o},${y1o}`,
+      `A${outerR},${outerR} 0 ${largeArc} 1 ${x2o},${y2o}`,
+      `L${x1i},${y1i}`,
+      `A${innerR},${innerR} 0 ${largeArc} 0 ${x2i},${y2i}`,
+      'Z',
+    ].join(' ')
+
+    return { ...item, path, color: colors[i % colors.length], pct: Math.round(pct * 100) }
+  })
+
+  return (
+    <div className="result-question">
+      <h3 className="result-question__title">{question.title}</h3>
+      <div className="donut-container">
+        <svg viewBox={`0 0 ${size} ${size}`} className="donut-svg">
+          {arcs.map((arc, i) => (
+            <path key={i} d={arc.path} fill={arc.color} />
+          ))}
+          <text x={cx} y={cy - 8} textAnchor="middle" fill="var(--color-text)" fontSize="28" fontWeight="700" fontFamily="var(--font-headline)">
+            {total}
+          </text>
+          <text x={cx} y={cy + 14} textAnchor="middle" fill="var(--brand-teal)" fontSize="11">
+            responses
+          </text>
+        </svg>
+        <div className="donut-legend">
+          {arcs.map((arc, i) => (
+            <div key={i} className="donut-legend__item">
+              <span className="donut-legend__swatch" style={{ background: arc.color }} />
+              <span className="donut-legend__label">{arc.label}</span>
+              <span className="donut-legend__count">{arc.count} ({arc.pct}%)</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Gradient bar for linear scales (CLAUDE.md familiarity)
+function GradientScale({ question, data, total }) {
+  const items = question.options.map((opt) => ({
+    ...opt,
+    ...(data[opt.value] || { count: 0, emails: [] }),
+  }))
+
+  const maxCount = Math.max(...items.map((i) => i.count), 1)
+
+  return (
+    <div className="result-question">
+      <h3 className="result-question__title">{question.title}</h3>
+      <div className="gradient-scale">
+        {items.map((item, i) => {
+          const pct = total > 0 ? Math.round((item.count / total) * 100) : 0
+          const intensity = item.count / maxCount
+          return (
+            <div key={item.value} className="gradient-scale__item">
+              <div
+                className="gradient-scale__bar"
+                style={{
+                  height: `${Math.max(intensity * 120, 8)}px`,
+                  opacity: 0.3 + intensity * 0.7,
+                }}
+              />
+              <div className="gradient-scale__count">{item.count}</div>
+              <div className="gradient-scale__label">{item.label}</div>
+              {item.emails && item.emails.length > 0 && (
+                <div className="gradient-scale__avatars">
+                  {item.emails.map((email, j) => (
+                    <MiniAvatar key={j} email={email} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 function BarChart({ question, data, total }) {
   const sorted = question.options
     .map((opt) => ({ ...opt, ...(data[opt.value] || { count: 0, emails: [] }) }))
@@ -149,6 +342,54 @@ function TextResponses({ question, responses }) {
   )
 }
 
+// Pick the right chart for each question
+function QuestionChart({ question, data, total }) {
+  if (question.type === 'text') {
+    return <TextResponses question={question} responses={data} />
+  }
+
+  // Radar for workflow capabilities
+  if (question.id === 'q1_workflow') {
+    return <RadarChart question={question} data={data || {}} total={total} />
+  }
+
+  // Donut for role and time split
+  if (question.id === 'q2_role' || question.id === 'q8_time_split') {
+    return <DonutChart question={question} data={data || {}} total={total} />
+  }
+
+  // Gradient scale for linear familiarity ratings and sentiment
+  if (question.id === 'q5_claude_md' || question.id === 'q6_vibecoding') {
+    return <GradientScale question={question} data={data || {}} total={total} />
+  }
+
+  // Default: bar chart
+  return <BarChart question={question} data={data || {}} total={total} />
+}
+
+function QuestionBoardResults({ boardQuestions }) {
+  if (!boardQuestions || boardQuestions.length === 0) return null
+
+  const sorted = [...boardQuestions].sort((a, b) => (b.votes?.length || 0) - (a.votes?.length || 0))
+
+  return (
+    <div className="results-section">
+      <h2 className="results-section__title">Question Board</h2>
+      <div className="result-question">
+        <h3 className="result-question__title">Top requested topics</h3>
+        <div className="qboard-results">
+          {sorted.map((q) => (
+            <div key={q._id} className="qboard-result-item">
+              <div className="qboard-result-votes">{q.votes?.length || 0}</div>
+              <div className="qboard-result-text">{q.text}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function generateFakeResponses(count = 24) {
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)]
   const pickN = (arr, min, max) => {
@@ -168,8 +409,16 @@ function generateFakeResponses(count = 24) {
       if (q.type === 'text') {
         if (Math.random() > 0.4) {
           const texts = {
-            q14_excited: ['Test generation for our Rails API', 'Automating PR reviews', 'Refactoring the Angular monorepo', 'Writing Helm charts faster', 'Debugging Sidekiq jobs', 'Speeding up migration writing', 'Better code review workflows', 'Prototyping new features quickly'],
-            q15_anything_else: ['More on MCP servers', 'Cross-repo workflows', 'How to handle large legacy codebases', 'Security best practices with AI', '', '', ''],
+            q3_ai_setup: [
+              'Claude Code CLI daily, Copilot for autocomplete, ChatGPT for brainstorming',
+              'Cursor with Claude, sometimes ChatGPT for quick questions',
+              'Claude Code in VS Code, custom MCP server for Jira',
+              'Mostly Copilot, trying to switch to Claude Code',
+              'Claude CLI with YOLO mode, worktrees for parallel work',
+              'ChatGPT for research, Claude for coding, Copilot suggestions',
+              'Just getting started with Claude Code, used Copilot before',
+              'Claude Code + custom commands for our Rails patterns',
+            ],
           }
           resp[q.id] = pick(texts[q.id] || [''])
         }
@@ -177,20 +426,42 @@ function generateFakeResponses(count = 24) {
         const vals = pickN(q.options.map((o) => o.value), 1, Math.min(3, q.options.length))
         resp[q.id] = vals
       } else {
-        // Weight earlier options slightly more for realistic distribution
         const weights = q.options.map((_, i) => Math.max(1, q.options.length - i))
         const totalW = weights.reduce((a, b) => a + b, 0)
         let r = Math.random() * totalW
         let idx = 0
-        for (let i = 0; i < weights.length; i++) {
-          r -= weights[i]
-          if (r <= 0) { idx = i; break }
+        for (let j = 0; j < weights.length; j++) {
+          r -= weights[j]
+          if (r <= 0) { idx = j; break }
         }
         resp[q.id] = q.options[idx].value
       }
     }
     return resp
   })
+}
+
+function generateFakeQuestions() {
+  const fakeNames = ['alex', 'jordan', 'casey', 'morgan', 'taylor', 'riley', 'drew', 'sam']
+  const topics = [
+    'How to handle large legacy Rails codebases with Claude?',
+    'Best practices for AI-generated code review',
+    'MCP server setup for internal tools',
+    'Cross-repo refactoring strategies',
+    'How to write effective CLAUDE.md files?',
+    'When to use Opus vs Sonnet?',
+    'Dealing with rate limits on Max plan',
+    'Security considerations with YOLO mode',
+    'Testing strategies with AI-generated code',
+    'How to onboard team members to Claude Code?',
+  ]
+  return topics.map((text, i) => ({
+    _id: `fake-q-${i}`,
+    text,
+    email: `${fakeNames[i % fakeNames.length]}@callrail.com`,
+    votes: fakeNames.slice(0, 1 + Math.floor(Math.random() * 7)).map((n) => `${n}@callrail.com`),
+    createdAt: new Date(Date.now() - Math.random() * 7 * 86400000).toISOString(),
+  }))
 }
 
 const RESULTS_PASSWORD = 'tyrannosaurus'
@@ -200,6 +471,7 @@ export default function Results() {
   const [pw, setPw] = useState('')
   const [pwError, setPwError] = useState(false)
   const [allResponses, setAllResponses] = useState(null)
+  const [boardQuestions, setBoardQuestions] = useState(null)
   const [excludeTTech, setExcludeTTech] = useState(true)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -207,9 +479,10 @@ export default function Results() {
   useEffect(() => {
     if (!authed) return
     setLoading(true)
-    fetchResults()
-      .then((data) => {
-        setAllResponses(data)
+    Promise.all([fetchResults(), fetchQuestions()])
+      .then(([surveyData, questionData]) => {
+        setAllResponses(surveyData)
+        setBoardQuestions(questionData)
         setLoading(false)
       })
       .catch((err) => {
@@ -351,31 +624,33 @@ export default function Results() {
                 <div className="stat__number">{total}</div>
                 <div className="stat__label">Responses</div>
               </div>
-              {agg.q1_yegge_stage && (
+              {agg.q1_workflow && (
                 <div className="stat">
                   <div className="stat__number">
                     {(() => {
-                      const d = agg.q1_yegge_stage
-                      let sum = 0, n = 0
-                      for (const [stage, { count }] of Object.entries(d)) {
-                        sum += parseInt(stage) * count
-                        n += count
-                      }
-                      return n > 0 ? (sum / n).toFixed(1) : '—'
+                      const d = agg.q1_workflow
+                      const advanced = ['yolo', 'custom_commands', 'hooks', 'mcp', 'multi_agent']
+                      const advancedCount = advanced.reduce((sum, key) => sum + (d[key]?.count || 0), 0)
+                      const basic = ['chat', 'autocomplete']
+                      const basicCount = basic.reduce((sum, key) => sum + (d[key]?.count || 0), 0)
+                      return advancedCount > basicCount ? 'Advanced' : 'Getting Started'
                     })()}
                   </div>
-                  <div className="stat__label">Avg Yegge Stage</div>
+                  <div className="stat__label">Room Skew</div>
                 </div>
               )}
-              {agg.q7_frequency && (
+              {agg.q8_time_split && (
                 <div className="stat">
                   <div className="stat__number">
                     {(() => {
-                      const daily = (agg.q7_frequency.daily?.count || 0) + (agg.q7_frequency.several_week?.count || 0)
-                      return total > 0 ? `${Math.round((daily / total) * 100)}%` : '—'
+                      const cc = agg.q8_time_split.crash_course?.count || 0
+                      const adv = agg.q8_time_split.advanced?.count || 0
+                      if (cc > adv) return 'Fundamentals'
+                      if (adv > cc) return 'Advanced'
+                      return 'Balanced'
                     })()}
                   </div>
-                  <div className="stat__label">Use CC Weekly+</div>
+                  <div className="stat__label">Wants Focus On</div>
                 </div>
               )}
             </div>
@@ -386,16 +661,15 @@ export default function Results() {
               return (
                 <div key={section.id} className="results-section">
                   <h2 className="results-section__title">{section.title}</h2>
-                  {sectionQuestions.map((q) =>
-                    q.type === 'text' ? (
-                      <TextResponses key={q.id} question={q} responses={agg[q.id]} />
-                    ) : (
-                      <BarChart key={q.id} question={q} data={agg[q.id] || {}} total={total} />
-                    )
-                  )}
+                  {sectionQuestions.map((q) => (
+                    <QuestionChart key={q.id} question={q} data={agg[q.id]} total={total} />
+                  ))}
                 </div>
               )
             })}
+
+            {/* Question Board */}
+            <QuestionBoardResults boardQuestions={boardQuestions} />
           </>
         )}
       </main>

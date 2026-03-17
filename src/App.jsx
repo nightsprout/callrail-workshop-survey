@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { questions, sections } from './questions'
 import { submitSurvey } from './sanity'
+import QuestionBoard from './QuestionBoard'
 import logo from './assets/logo-symbol.png'
 import './App.css'
 
@@ -17,7 +18,7 @@ function QuestionBlock({ question, value, onChange, otherValue, onOtherChange })
           value={value || ''}
           onChange={(e) => onChange(question.id, e.target.value)}
           rows={3}
-          placeholder="Type your answer..."
+          placeholder={question.placeholder || 'Type your answer...'}
         />
       </div>
     )
@@ -169,6 +170,10 @@ export default function App() {
             <p>Your responses have been recorded. See you on March 26th!</p>
           </div>
         </div>
+        <QuestionBoard email={email.trim().toLowerCase()} />
+        <footer className="survey-footer">
+          <p>Tyrannosaurus Tech &middot; Claude Code Workshop &middot; March 26, 2026</p>
+        </footer>
       </>
     )
   }
@@ -185,7 +190,7 @@ export default function App() {
       <div className="survey-hero">
         <div className="survey-hero__inner">
           <h1>Pre-Workshop Survey</h1>
-          <p>Help us tailor the workshop to you. Takes about 5 minutes.</p>
+          <p>Help us tailor the workshop to you. Takes about 2 minutes.</p>
         </div>
       </div>
 
