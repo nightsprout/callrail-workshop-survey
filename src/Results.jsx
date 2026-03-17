@@ -170,37 +170,53 @@ function DonutChart({ question, data, total }) {
 
   const colorValues = ['#00CE7C', '#00D2C8', '#0069FF', '#007D8A', '#004F3B', '#F2FF69', '#FF6B6B']
 
-  // Build conic-gradient stops
-  let cumPct = 0
-  const stops = []
-  const itemsWithColor = items.map((item, i) => {
-    const pct = total > 0 ? (item.count / total) * 100 : 0
-    const color = colorValues[i % colorValues.length]
-    stops.push(`${color} ${cumPct}% ${cumPct + pct}%`)
-    cumPct += pct
-    return { ...item, color, pct: Math.round(pct) }
-  })
+  const radius = 80
+  const stroke = 32
+  const circumference = 2 * Math.PI * radius
+  const size = (radius + stroke / 2) * 2
 
-  const gradient = stops.length > 0
-    ? `conic-gradient(from 0deg, ${stops.join(', ')})`
-    : 'conic-gradient(rgba(0,53,59,0.1) 0% 100%)'
+  let offset = 0
+  const segments = items.map((item, i) => {
+    const pct = total > 0 ? item.count / total : 0
+    const dash = pct * circumference
+    const gap = circumference - dash
+    const seg = { ...item, color: colorValues[i % colorValues.length], pct: Math.round(pct * 100), dash, gap, offset }
+    offset += dash
+    return seg
+  })
 
   return (
     <div className="result-question">
       <h3 className="result-question__title">{question.title}</h3>
       <div className="donut-container">
-        <div className="donut-ring" style={{ background: gradient }}>
-          <div className="donut-ring__hole">
-            <div className="donut-ring__number">{total}</div>
-            <div className="donut-ring__label">responses</div>
-          </div>
-        </div>
+        <svg viewBox={`0 0 ${size} ${size}`} className="donut-svg">
+          {/* Background ring */}
+          <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(0,53,59,0.1)" strokeWidth={stroke} />
+          {/* Data segments */}
+          {segments.map((seg, i) => (
+            <circle
+              key={i}
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="none"
+              stroke={seg.color}
+              strokeWidth={stroke}
+              strokeDasharray={`${seg.dash} ${seg.gap}`}
+              strokeDashoffset={-seg.offset}
+              strokeLinecap="butt"
+              style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%' }}
+            />
+          ))}
+          <text x={size / 2} y={size / 2 - 6} textAnchor="middle" className="donut-center-number">{total}</text>
+          <text x={size / 2} y={size / 2 + 12} textAnchor="middle" className="donut-center-label">responses</text>
+        </svg>
         <div className="donut-legend">
-          {itemsWithColor.map((item, i) => (
+          {segments.map((seg, i) => (
             <div key={i} className="donut-legend__item">
-              <span className="donut-legend__swatch" style={{ background: item.color }} />
-              <span className="donut-legend__label">{item.label}</span>
-              <span className="donut-legend__count">{item.count} ({item.pct}%)</span>
+              <span className="donut-legend__swatch" style={{ background: seg.color }} />
+              <span className="donut-legend__label">{seg.label}</span>
+              <span className="donut-legend__count">{seg.count} ({seg.pct}%)</span>
             </div>
           ))}
         </div>
@@ -209,51 +225,69 @@ function DonutChart({ question, data, total }) {
   )
 }
 
-// Gradient bar for linear scales (CLAUDE.md familiarity)
+// Horizontal stacked sentiment bar
 function GradientScale({ question, data, total }) {
-  const items = question.options.map((opt) => ({
+  const sentimentColors = ['#00CE7C', '#00D2C8', '#F2FF69', '#FFB347', '#FF6B6B']
+  const familiarityColors = ['#FF6B6B', '#FFB347', '#F2FF69', '#00D2C8', '#00CE7C']
+  const colors = question.id === 'q5_claude_md' ? familiarityColors : sentimentColors
+
+  const items = question.options.map((opt, i) => ({
     ...opt,
     ...(data[opt.value] || { count: 0, emails: [] }),
+    color: colors[i % colors.length],
   }))
 
-  const maxCount = Math.max(...items.map((i) => i.count), 1)
+  const mid = Math.floor(items.length / 2)
+  const totalCount = items.reduce((s, it) => s + it.count, 0)
 
   return (
     <div className="result-question">
       <h3 className="result-question__title">{question.title}</h3>
-      <div className="gradient-scale">
-        <div className="gradient-scale__bars">
-          {items.map((item) => {
-            const intensity = item.count / maxCount
+      <div className="sentiment-bar">
+        <div className="sentiment-bar__track">
+          {items.map((item, i) => {
+            const isMid = i === mid
+            const pct = totalCount > 0 ? (item.count / totalCount) * 100 : 0
             return (
-              <div key={item.value} className="gradient-scale__col">
-                <div className="gradient-scale__bar-area">
-                  <div
-                    className="gradient-scale__bar"
-                    style={{
-                      height: `${Math.max(intensity * 100, 6)}%`,
-                      opacity: 0.3 + intensity * 0.7,
-                    }}
-                  />
-                </div>
-                <div className="gradient-scale__count">{item.count}</div>
+              <div
+                key={item.value}
+                className={`sentiment-bar__seg${isMid ? ' sentiment-bar__seg--mid' : ''}`}
+                style={{
+                  flex: totalCount > 0 ? `${item.count} 0 0%` : (isMid ? '1 0 0%' : '0 0 0%'),
+                  minWidth: isMid ? '20%' : (item.count > 0 ? '8%' : 0),
+                  background: item.color,
+                }}
+              >
+                {(item.count > 0 || isMid) && (
+                  <span className="sentiment-bar__count">{item.count}</span>
+                )}
               </div>
             )
           })}
         </div>
-        <div className="gradient-scale__labels">
-          {items.map((item) => (
-            <div key={item.value} className="gradient-scale__label-col">
-              <div className="gradient-scale__label">{item.label}</div>
-              {item.emails && item.emails.length > 0 && (
-                <div className="gradient-scale__avatars">
-                  {item.emails.map((email, j) => (
-                    <MiniAvatar key={j} email={email} />
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+        <div className="sentiment-bar__labels">
+          {items.map((item, i) => {
+            const isMid = i === mid
+            return (
+              <div
+                key={item.value}
+                className="sentiment-bar__label-col"
+                style={{
+                  flex: totalCount > 0 ? `${item.count} 0 0%` : (isMid ? '1 0 0%' : '0 0 0%'),
+                  minWidth: isMid ? '20%' : (item.count > 0 ? '8%' : 0),
+                }}
+              >
+                <div className="sentiment-bar__label">{item.label}</div>
+                {item.emails && item.emails.length > 0 && (
+                  <div className="sentiment-bar__avatars">
+                    {item.emails.map((email, j) => (
+                      <MiniAvatar key={j} email={email} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>
