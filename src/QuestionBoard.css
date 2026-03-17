@@ -149,6 +149,12 @@
   line-height: 1.4;
 }
 
+.qboard__item-author {
+  font-size: 13px;
+  color: var(--brand-teal);
+  opacity: 0.7;
+}
+
 /* States */
 .qboard__error {
   padding: 12px 16px;

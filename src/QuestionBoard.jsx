@@ -122,6 +122,7 @@ export default function QuestionBoard({ email }) {
                 </button>
                 <div className="qboard__item-content">
                   <span className="qboard__item-text">{q.text}</span>
+                  <span className="qboard__item-author">{q.email?.split('@')[0]}</span>
                 </div>
               </li>
             )

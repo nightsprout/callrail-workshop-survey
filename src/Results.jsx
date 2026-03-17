@@ -246,19 +246,28 @@ function GradientScale({ question, data, total }) {
     <div className="result-question">
       <h3 className="result-question__title">{question.title}</h3>
       <div className="gradient-scale">
-        {items.map((item, i) => {
-          const pct = total > 0 ? Math.round((item.count / total) * 100) : 0
-          const intensity = item.count / maxCount
-          return (
-            <div key={item.value} className="gradient-scale__item">
-              <div
-                className="gradient-scale__bar"
-                style={{
-                  height: `${Math.max(intensity * 120, 8)}px`,
-                  opacity: 0.3 + intensity * 0.7,
-                }}
-              />
-              <div className="gradient-scale__count">{item.count}</div>
+        <div className="gradient-scale__bars">
+          {items.map((item) => {
+            const intensity = item.count / maxCount
+            return (
+              <div key={item.value} className="gradient-scale__col">
+                <div className="gradient-scale__bar-area">
+                  <div
+                    className="gradient-scale__bar"
+                    style={{
+                      height: `${Math.max(intensity * 100, 6)}%`,
+                      opacity: 0.3 + intensity * 0.7,
+                    }}
+                  />
+                </div>
+                <div className="gradient-scale__count">{item.count}</div>
+              </div>
+            )
+          })}
+        </div>
+        <div className="gradient-scale__labels">
+          {items.map((item) => (
+            <div key={item.value} className="gradient-scale__label-col">
               <div className="gradient-scale__label">{item.label}</div>
               {item.emails && item.emails.length > 0 && (
                 <div className="gradient-scale__avatars">
@@ -268,8 +277,8 @@ function GradientScale({ question, data, total }) {
                 </div>
               )}
             </div>
-          )
-        })}
+          ))}
+        </div>
       </div>
     </div>
   )
