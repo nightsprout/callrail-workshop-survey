@@ -263,7 +263,6 @@ function GradientScale({ question, data, total }) {
 function BarChart({ question, data, total }) {
   const sorted = question.options
     .map((opt) => ({ ...opt, ...(data[opt.value] || { count: 0, emails: [] }) }))
-    .sort((a, b) => b.count - a.count)
 
   return (
     <div className="result-question">
