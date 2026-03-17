@@ -48,3 +48,13 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Install Studio dependencies
+        run: cd studio && pnpm install --no-frozen-lockfile
+
+      - name: Deploy Sanity Studio
+        run: cd studio && npx sanity deploy --no-browser
+        env:
+          SANITY_STUDIO_PROJECT_ID: ${{ secrets.VITE_SANITY_PROJECT_ID }}
+          SANITY_STUDIO_DATASET: ${{ secrets.VITE_SANITY_DATASET }}
+          SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}

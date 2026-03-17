@@ -221,7 +221,7 @@ function DonutChart({ question, data, total }) {
       <div className="donut-container">
         <svg viewBox={`0 0 ${size} ${size}`} className="donut-svg">
           {arcs.map((arc, i) => (
-            <path key={i} d={arc.path} fill={arc.color} fillRule="evenodd" />
+            <path key={i} d={arc.path} fill={arc.color} fillRule={items.length === 1 ? 'evenodd' : 'nonzero'} />
           ))}
           <text x={cx} y={cy - 8} textAnchor="middle" fill="var(--color-text)" fontSize="28" fontWeight="700" fontFamily="var(--font-headline)">
             {total}
