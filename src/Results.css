@@ -16,6 +16,11 @@
   opacity: 1;
 }
 
+/* Align header with results content width */
+.results-page .survey-header__inner {
+  max-width: 900px;
+}
+
 /* Hero */
 .results-hero {
   background: var(--color-bg-dark);

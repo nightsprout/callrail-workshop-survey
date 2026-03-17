@@ -222,7 +222,7 @@ export default function Results() {
 
   if (!authed) {
     return (
-      <>
+      <div className="results-page">
         <header className="survey-header">
           <div className="survey-header__inner">
             <img src={logo} alt="T-Rex Tech" className="survey-header__logo" />
@@ -260,12 +260,12 @@ export default function Results() {
             {pwError && <div className="pw-gate__error">Incorrect password</div>}
           </form>
         </main>
-      </>
+      </div>
     )
   }
 
   return (
-    <>
+    <div className="results-page">
       <header className="survey-header">
         <div className="survey-header__inner">
           <img src={logo} alt="T-Rex Tech" className="survey-header__logo" />
@@ -386,6 +386,6 @@ export default function Results() {
       <footer className="survey-footer">
         <p>Tyrannosaurus Tech &middot; Claude Code Workshop &middot; March 26, 2026</p>
       </footer>
-    </>
+    </div>
   )
 }
