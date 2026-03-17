@@ -5,7 +5,7 @@ import { submitSurvey } from './sanity'
 import logo from './assets/logo-symbol.png'
 import './App.css'
 
-function QuestionBlock({ question, value, onChange }) {
+function QuestionBlock({ question, value, onChange, otherValue, onOtherChange }) {
   if (question.type === 'text') {
     return (
       <div className="question">
@@ -26,6 +26,10 @@ function QuestionBlock({ question, value, onChange }) {
 
   const isCheckbox = question.type === 'checkbox'
   const currentValues = isCheckbox ? (value || []) : value
+  const hasOther = question.options.some((o) => o.value === 'other')
+  const otherSelected = isCheckbox
+    ? (currentValues || []).includes('other')
+    : currentValues === 'other'
 
   function handleChange(optionValue) {
     if (isCheckbox) {
@@ -76,6 +80,16 @@ function QuestionBlock({ question, value, onChange }) {
           )
         })}
       </div>
+      {hasOther && otherSelected && (
+        <input
+          type="text"
+          className="question__other-input"
+          value={otherValue || ''}
+          onChange={(e) => onOtherChange(question.id + '_other', e.target.value)}
+          placeholder="Please specify..."
+          autoFocus
+        />
+      )}
     </div>
   )
 }
@@ -191,6 +205,8 @@ export default function App() {
                     question={q}
                     value={answers[q.id]}
                     onChange={handleChange}
+                    otherValue={answers[q.id + '_other']}
+                    onOtherChange={handleChange}
                   />
                 ))}
               </div>

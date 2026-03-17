@@ -136,6 +136,24 @@
   color: #dc2626;
 }
 
+.question__other-input {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 15px;
+  padding: 10px 14px;
+  margin-top: 8px;
+  border: 2px solid var(--brand-green);
+  border-radius: 6px;
+  background: var(--brand-white);
+  color: var(--color-text);
+  transition: border-color 0.15s;
+}
+
+.question__other-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 206, 124, 0.15);
+}
+
 .question__hint {
   font-size: 14px;
   color: var(--brand-teal);
