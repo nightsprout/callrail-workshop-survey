@@ -193,19 +193,18 @@ function generateFakeResponses(count = 24) {
   })
 }
 
+const RESULTS_PASSWORD = 'tyrannosaurus'
+
 export default function Results() {
+  const [authed, setAuthed] = useState(() => sessionStorage.getItem('results_authed') === '1')
+  const [pw, setPw] = useState('')
+  const [pwError, setPwError] = useState(false)
   const [responses, setResponses] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [useFake, setUseFake] = useState(false)
 
   useEffect(() => {
-    if (useFake) {
-      setResponses(generateFakeResponses(24))
-      setLoading(false)
-      setError(null)
-      return
-    }
+    if (!authed) return
     setLoading(true)
     fetchResults()
       .then((data) => {
@@ -216,10 +215,54 @@ export default function Results() {
         setError(err.message)
         setLoading(false)
       })
-  }, [useFake])
+  }, [authed])
 
   const total = responses ? responses.length : 0
   const agg = responses ? aggregateResponses(responses) : {}
+
+  if (!authed) {
+    return (
+      <>
+        <header className="survey-header">
+          <div className="survey-header__inner">
+            <img src={logo} alt="T-Rex Tech" className="survey-header__logo" />
+            <span className="survey-header__title">Claude Code Workshop</span>
+            <nav className="results-nav">
+              <Link to="/">Take Survey</Link>
+            </nav>
+          </div>
+        </header>
+        <div className="results-hero">
+          <div className="results-hero__inner">
+            <h1>Survey Results</h1>
+            <p>Enter the password to view results</p>
+          </div>
+        </div>
+        <main className="results-content">
+          <form className="pw-gate" onSubmit={(e) => {
+            e.preventDefault()
+            if (pw === RESULTS_PASSWORD) {
+              sessionStorage.setItem('results_authed', '1')
+              setAuthed(true)
+            } else {
+              setPwError(true)
+            }
+          }}>
+            <input
+              type="password"
+              className="pw-gate__input"
+              value={pw}
+              onChange={(e) => { setPw(e.target.value); setPwError(false) }}
+              placeholder="Password"
+              autoFocus
+            />
+            <button type="submit" className="pw-gate__btn">View Results</button>
+            {pwError && <div className="pw-gate__error">Incorrect password</div>}
+          </form>
+        </main>
+      </>
+    )
+  }
 
   return (
     <>
@@ -247,22 +290,6 @@ export default function Results() {
       </div>
 
       <main className="results-content">
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-          <button
-            onClick={() => setUseFake((f) => !f)}
-            style={{
-              padding: '0.4rem 1rem',
-              fontSize: '0.85rem',
-              background: useFake ? 'var(--brand-green, #00c853)' : 'transparent',
-              color: useFake ? '#000' : 'var(--text-muted, #999)',
-              border: '1px solid var(--border, #333)',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            {useFake ? 'Showing Demo Data' : 'Show Demo Data'}
-          </button>
-        </div>
         {loading && <div className="results-loading">Loading...</div>}
 
         {error && (

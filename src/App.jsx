@@ -161,9 +161,6 @@ export default function App() {
         <div className="survey-header__inner">
           <img src={logo} alt="T-Rex Tech" className="survey-header__logo" />
           <span className="survey-header__title">Claude Code Workshop</span>
-          <nav className="results-nav">
-            <Link to="/results">View Results</Link>
-          </nav>
         </div>
       </header>
 
