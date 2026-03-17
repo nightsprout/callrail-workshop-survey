@@ -162,7 +162,7 @@ export const questions = [
   {
     id: 'q11_test_frameworks',
     section: 'your-stack',
-    title: 'What test frameworks does your team use?',
+    title: 'What test frameworks do you use?',
     hint: 'Select all that apply',
     type: 'checkbox',
     options: [
@@ -177,7 +177,7 @@ export const questions = [
   {
     id: 'q12_docs',
     section: 'your-stack',
-    title: 'Where does your team keep documentation?',
+    title: 'Where do you look for documentation?',
     hint: 'Select all that apply',
     type: 'checkbox',
     options: [
