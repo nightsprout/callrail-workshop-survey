@@ -290,6 +290,28 @@
   background: #00b86e;
 }
 
+/* Filters */
+.results-filters {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--brand-teal);
+  cursor: pointer;
+}
+
+.filter-toggle input {
+  accent-color: var(--brand-green);
+  width: 16px;
+  height: 16px;
+}
+
 /* Password gate */
 .pw-gate {
   max-width: 360px;

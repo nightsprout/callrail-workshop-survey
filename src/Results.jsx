@@ -199,7 +199,8 @@ export default function Results() {
   const [authed, setAuthed] = useState(() => sessionStorage.getItem('results_authed') === '1')
   const [pw, setPw] = useState('')
   const [pwError, setPwError] = useState(false)
-  const [responses, setResponses] = useState(null)
+  const [allResponses, setAllResponses] = useState(null)
+  const [excludeTTech, setExcludeTTech] = useState(true)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -208,7 +209,7 @@ export default function Results() {
     setLoading(true)
     fetchResults()
       .then((data) => {
-        setResponses(data)
+        setAllResponses(data)
         setLoading(false)
       })
       .catch((err) => {
@@ -217,6 +218,11 @@ export default function Results() {
       })
   }, [authed])
 
+  const responses = allResponses
+    ? excludeTTech
+      ? allResponses.filter((r) => !r.email || !r.email.endsWith('@tyrannosaurustech.com'))
+      : allResponses
+    : null
   const total = responses ? responses.length : 0
   const agg = responses ? aggregateResponses(responses) : {}
 
@@ -307,6 +313,17 @@ export default function Results() {
 
         {!loading && !error && total > 0 && (
           <>
+            <div className="results-filters">
+              <label className="filter-toggle">
+                <input
+                  type="checkbox"
+                  checked={excludeTTech}
+                  onChange={(e) => setExcludeTTech(e.target.checked)}
+                />
+                <span>Exclude Tyrannosaurus Tech</span>
+              </label>
+            </div>
+
             {/* Respondent avatars */}
             {responses && responses.length > 0 && (
               <div className="respondent-avatars">
