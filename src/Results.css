@@ -77,9 +77,42 @@
   cursor: default;
 }
 
-.avatar:nth-child(4n+2) { background: var(--brand-teal); color: var(--brand-white); border-color: var(--brand-teal); }
-.avatar:nth-child(4n+3) { background: var(--brand-blue); color: var(--brand-white); border-color: var(--brand-blue); }
-.avatar:nth-child(4n+4) { background: var(--brand-dark-green); color: var(--brand-green); border-color: var(--brand-green); }
+/* Mini avatars in bar charts */
+.mini-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: 700;
+  font-family: var(--font-headline);
+  letter-spacing: 0.02em;
+  border: 1.5px solid;
+  flex-shrink: 0;
+}
+
+.result-bar__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.result-bar__row .result-bar__track {
+  flex: 1;
+}
+
+.result-bar__avatars {
+  display: flex;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.result-text-item .mini-avatar {
+  margin-right: 8px;
+  vertical-align: middle;
+}
 
 /* Stats row */
 .results-stats {

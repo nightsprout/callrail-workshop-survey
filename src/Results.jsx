@@ -5,45 +5,86 @@ import { fetchResults } from './sanity'
 import logo from './assets/logo-symbol.png'
 import './Results.css'
 
+const AVATAR_COLORS = [
+  { bg: 'var(--brand-dark-blue)', fg: 'var(--brand-green)', border: 'var(--brand-green)' },
+  { bg: 'var(--brand-teal)', fg: 'var(--brand-white)', border: 'var(--brand-teal)' },
+  { bg: 'var(--brand-blue)', fg: 'var(--brand-white)', border: 'var(--brand-blue)' },
+  { bg: 'var(--brand-dark-green)', fg: 'var(--brand-green)', border: 'var(--brand-green)' },
+]
+
+function getInitials(email) {
+  if (!email) return '??'
+  const parts = email.split('@')[0].split('.')
+  return parts.length >= 2
+    ? (parts[0][0] + parts[1][0]).toUpperCase()
+    : email.substring(0, 2).toUpperCase()
+}
+
+function getAvatarColor(email) {
+  let hash = 0
+  for (let i = 0; i < (email || '').length; i++) hash = ((hash << 5) - hash + email.charCodeAt(i)) | 0
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
+}
+
+function MiniAvatar({ email }) {
+  const initials = getInitials(email)
+  const color = getAvatarColor(email)
+  return (
+    <span
+      className="mini-avatar"
+      title={initials}
+      style={{ background: color.bg, color: color.fg, borderColor: color.border }}
+    >
+      {initials}
+    </span>
+  )
+}
+
 function aggregateResponses(responses) {
   const agg = {}
 
   for (const q of questions) {
     if (q.type === 'text') {
       agg[q.id] = responses
-        .map((r) => r[q.id])
-        .filter(Boolean)
+        .map((r) => ({ text: r[q.id], email: r.email }))
+        .filter((r) => r.text)
     } else if (q.type === 'checkbox') {
-      const counts = {}
+      const data = {}
       for (const opt of q.options) {
-        counts[opt.value] = 0
+        data[opt.value] = { count: 0, emails: [] }
       }
       for (const r of responses) {
         const vals = r[q.id] || []
         for (const v of vals) {
-          if (counts[v] !== undefined) counts[v]++
+          if (data[v]) {
+            data[v].count++
+            if (r.email) data[v].emails.push(r.email)
+          }
         }
       }
-      agg[q.id] = counts
+      agg[q.id] = data
     } else {
-      const counts = {}
+      const data = {}
       for (const opt of q.options) {
-        counts[opt.value] = 0
+        data[opt.value] = { count: 0, emails: [] }
       }
       for (const r of responses) {
         const v = r[q.id]
-        if (v && counts[v] !== undefined) counts[v]++
+        if (v && data[v]) {
+          data[v].count++
+          if (r.email) data[v].emails.push(r.email)
+        }
       }
-      agg[q.id] = counts
+      agg[q.id] = data
     }
   }
 
   return agg
 }
 
-function BarChart({ question, counts, total }) {
+function BarChart({ question, data, total }) {
   const sorted = question.options
-    .map((opt) => ({ ...opt, count: counts[opt.value] || 0 }))
+    .map((opt) => ({ ...opt, ...(data[opt.value] || { count: 0, emails: [] }) }))
     .sort((a, b) => b.count - a.count)
 
   return (
@@ -60,11 +101,20 @@ function BarChart({ question, counts, total }) {
                   {opt.count} ({pct}%)
                 </span>
               </div>
-              <div className="result-bar__track">
-                <div
-                  className="result-bar__fill"
-                  style={{ width: `${Math.max(pct, 2)}%` }}
-                />
+              <div className="result-bar__row">
+                <div className="result-bar__track">
+                  <div
+                    className="result-bar__fill"
+                    style={{ width: `${Math.max(pct, 2)}%` }}
+                  />
+                </div>
+                {opt.emails && opt.emails.length > 0 && (
+                  <div className="result-bar__avatars">
+                    {opt.emails.map((email, i) => (
+                      <MiniAvatar key={i} email={email} />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )
@@ -88,8 +138,11 @@ function TextResponses({ question, responses }) {
     <div className="result-question">
       <h3 className="result-question__title">{question.title}</h3>
       <ul className="result-text-list">
-        {responses.map((text, i) => (
-          <li key={i} className="result-text-item">{text}</li>
+        {responses.map((r, i) => (
+          <li key={i} className="result-text-item">
+            {r.email && <MiniAvatar email={r.email} />}
+            {r.text}
+          </li>
         ))}
       </ul>
     </div>
@@ -233,13 +286,15 @@ export default function Results() {
                 {responses
                   .filter((r) => r.email)
                   .map((r, i) => {
-                    const parts = r.email.split('@')[0].split('.')
-                    const initials = parts.length >= 2
-                      ? (parts[0][0] + parts[1][0]).toUpperCase()
-                      : r.email.substring(0, 2).toUpperCase()
+                    const color = getAvatarColor(r.email)
                     return (
-                      <div key={i} className="avatar" title={`Responded ${new Date(r.submittedAt).toLocaleDateString()}`}>
-                        {initials}
+                      <div
+                        key={i}
+                        className="avatar"
+                        title={`Responded ${new Date(r.submittedAt).toLocaleDateString()}`}
+                        style={{ background: color.bg, color: color.fg, borderColor: color.border }}
+                      >
+                        {getInitials(r.email)}
                       </div>
                     )
                   })}
@@ -256,9 +311,9 @@ export default function Results() {
                 <div className="stat">
                   <div className="stat__number">
                     {(() => {
-                      const counts = agg.q1_yegge_stage
+                      const d = agg.q1_yegge_stage
                       let sum = 0, n = 0
-                      for (const [stage, count] of Object.entries(counts)) {
+                      for (const [stage, { count }] of Object.entries(d)) {
                         sum += parseInt(stage) * count
                         n += count
                       }
@@ -272,7 +327,7 @@ export default function Results() {
                 <div className="stat">
                   <div className="stat__number">
                     {(() => {
-                      const daily = (agg.q7_frequency.daily || 0) + (agg.q7_frequency.several_week || 0)
+                      const daily = (agg.q7_frequency.daily?.count || 0) + (agg.q7_frequency.several_week?.count || 0)
                       return total > 0 ? `${Math.round((daily / total) * 100)}%` : '—'
                     })()}
                   </div>
@@ -291,7 +346,7 @@ export default function Results() {
                     q.type === 'text' ? (
                       <TextResponses key={q.id} question={q} responses={agg[q.id]} />
                     ) : (
-                      <BarChart key={q.id} question={q} counts={agg[q.id] || {}} total={total} />
+                      <BarChart key={q.id} question={q} data={agg[q.id] || {}} total={total} />
                     )
                   )}
                 </div>
