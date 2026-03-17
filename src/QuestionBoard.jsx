@@ -9,10 +9,17 @@ export default function QuestionBoard({ email }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  const DEFAULT_QUESTIONS = [
+    { _id: 'default-1', text: 'What is a token?', email: 'workshop@tyrannosaurustech.com', votes: [], createdAt: '2026-03-14T00:00:00Z' },
+  ]
+
   const loadQuestions = useCallback(async () => {
     try {
       const data = await fetchQuestions()
-      setQuestions(data || [])
+      // Merge defaults that don't already exist (by text match)
+      const existing = (data || []).map((q) => q.text.toLowerCase())
+      const defaults = DEFAULT_QUESTIONS.filter((d) => !existing.includes(d.text.toLowerCase()))
+      setQuestions([...(data || []), ...defaults])
     } catch (err) {
       setError(err.message)
     } finally {

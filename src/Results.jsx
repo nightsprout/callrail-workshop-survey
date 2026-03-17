@@ -178,10 +178,21 @@ function DonutChart({ question, data, total }) {
   let currentAngle = -Math.PI / 2
   const arcs = items.map((item, i) => {
     const pct = total > 0 ? item.count / total : 0
-    const angle = pct * 2 * Math.PI
+    const angle = Math.min(pct * 2 * Math.PI, 2 * Math.PI - 0.001) // prevent full circle (SVG arc bug)
     const startAngle = currentAngle
     const endAngle = currentAngle + angle
     currentAngle = endAngle
+
+    // Single item = full ring
+    if (items.length === 1) {
+      const path = [
+        `M${cx},${cy - outerR}`,
+        `A${outerR},${outerR} 0 1 1 ${cx - 0.001},${cy - outerR}`,
+        `M${cx},${cy - innerR}`,
+        `A${innerR},${innerR} 0 1 0 ${cx - 0.001},${cy - innerR}`,
+      ].join(' ')
+      return { ...item, path, color: colors[0], pct: 100 }
+    }
 
     const largeArc = angle > Math.PI ? 1 : 0
     const x1o = cx + outerR * Math.cos(startAngle)
@@ -210,7 +221,7 @@ function DonutChart({ question, data, total }) {
       <div className="donut-container">
         <svg viewBox={`0 0 ${size} ${size}`} className="donut-svg">
           {arcs.map((arc, i) => (
-            <path key={i} d={arc.path} fill={arc.color} />
+            <path key={i} d={arc.path} fill={arc.color} fillRule="evenodd" />
           ))}
           <text x={cx} y={cy - 8} textAnchor="middle" fill="var(--color-text)" fontSize="28" fontWeight="700" fontFamily="var(--font-headline)">
             {total}
@@ -698,50 +709,78 @@ export default function Results() {
                 )
               })()}
 
-              {/* Room capability spectrum */}
-              {agg.q1_workflow && (() => {
-                const d = agg.q1_workflow
-                const levels = [
-                  { key: 'chat', label: 'Chat' },
-                  { key: 'autocomplete', label: 'Autocomplete' },
-                  { key: 'ide_agent', label: 'IDE Agent' },
-                  { key: 'plan_mode', label: 'Plan Mode' },
-                  { key: 'context_mgmt', label: 'Context Mgmt' },
-                  { key: 'yolo', label: 'YOLO' },
-                  { key: 'custom_commands', label: 'Commands' },
-                  { key: 'hooks', label: 'Hooks' },
-                  { key: 'mcp', label: 'MCP' },
-                  { key: 'multi_agent', label: 'Multi-Agent' },
-                ]
-                const maxCount = Math.max(...levels.map((l) => d[l.key]?.count || 0), 1)
-
+              {/* Vibe coding sentiment */}
+              {agg.q6_vibecoding && (() => {
+                const d = agg.q6_vibecoding
+                const excited = (d.excited?.count || 0) + (d.cautious_optimism?.count || 0)
+                const concerned = (d.concerned?.count || 0) + (d.opposed?.count || 0)
+                const mixed = d.mixed?.count || 0
+                const dominant = excited > concerned ? 'Optimistic' : concerned > excited ? 'Cautious' : 'Split'
                 return (
-                  <div className="summary-card summary-card--spectrum">
-                    <div className="summary-card__label">Room Capability Spectrum</div>
-                    <div className="spectrum">
-                      {levels.map((level) => {
-                        const count = d[level.key]?.count || 0
-                        const intensity = count / maxCount
-                        return (
-                          <div key={level.key} className="spectrum__col">
-                            <div className="spectrum__bar-wrap">
-                              <div
-                                className="spectrum__bar"
-                                style={{
-                                  height: `${Math.max(intensity * 100, 4)}%`,
-                                  opacity: 0.2 + intensity * 0.8,
-                                }}
-                              />
-                            </div>
-                            <div className="spectrum__count">{count}</div>
-                            <div className="spectrum__label">{level.label}</div>
-                          </div>
-                        )
-                      })}
+                  <div className="summary-card">
+                    <div className="summary-card__label">Vibe Coding Sentiment</div>
+                    <div className="summary-card__header">
+                      <div className="summary-card__number summary-card__number--sm">{dominant}</div>
+                    </div>
+                    <div className="sentiment-bar">
+                      <div className="sentiment-bar__fill sentiment-bar__fill--green" style={{ flex: excited }} />
+                      <div className="sentiment-bar__fill sentiment-bar__fill--yellow" style={{ flex: mixed }} />
+                      <div className="sentiment-bar__fill sentiment-bar__fill--red" style={{ flex: concerned }} />
+                    </div>
+                    <div className="sentiment-legend">
+                      <span>Excited {excited}</span>
+                      <span>Mixed {mixed}</span>
+                      <span>Concerned {concerned}</span>
                     </div>
                   </div>
                 )
               })()}
+
+              {/* Top challenge */}
+              {agg.q7_challenges && (() => {
+                const d = agg.q7_challenges
+                const sorted = Object.entries(d)
+                  .filter(([key]) => key !== 'other')
+                  .sort((a, b) => b[1].count - a[1].count)
+                const top = sorted[0]
+                if (!top || top[1].count === 0) return null
+                const q = questions.find((q) => q.id === 'q7_challenges')
+                const label = q?.options.find((o) => o.value === top[0])?.label || top[0]
+                return (
+                  <div className="summary-card">
+                    <div className="summary-card__label">Top Challenge</div>
+                    <div className="summary-card__highlight">{label}</div>
+                    <div className="summary-card__meta">{top[1].count} of {total} respondents</div>
+                  </div>
+                )
+              })()}
+
+              {/* CLAUDE.md awareness */}
+              {agg.q5_claude_md && (() => {
+                const d = agg.q5_claude_md
+                const neverHeard = d.never_heard?.count || 0
+                const heardOf = d.heard_of?.count || 0
+                const newToIt = neverHeard + heardOf
+                const pct = total > 0 ? Math.round((newToIt / total) * 100) : 0
+                return (
+                  <div className="summary-card">
+                    <div className="summary-card__label">CLAUDE.md Awareness</div>
+                    <div className="summary-card__header">
+                      <div className="summary-card__number">{pct}%</div>
+                    </div>
+                    <div className="summary-card__meta">haven't set one up yet</div>
+                  </div>
+                )
+              })()}
+
+              {/* Questions submitted */}
+              <div className="summary-card">
+                <div className="summary-card__label">Questions Submitted</div>
+                <div className="summary-card__header">
+                  <div className="summary-card__number">{boardQuestions?.length || 0}</div>
+                </div>
+                <div className="summary-card__meta">topics for the workshop</div>
+              </div>
             </div>
 
             {/* Per-section results */}

@@ -121,7 +121,7 @@
 /* Dashboard summary */
 .dashboard-summary {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   margin-bottom: 48px;
 }
@@ -227,54 +227,57 @@
   margin-left: auto;
 }
 
-/* Room capability spectrum */
-.summary-card--spectrum {
-  grid-column: 1 / -1;
-  grid-row: 2;
+/* Summary card variants */
+.summary-card__number--sm {
+  font-size: 36px;
 }
 
-.spectrum {
-  display: flex;
-  gap: 4px;
-  height: 100px;
+.summary-card__highlight {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.3;
+  margin-bottom: 8px;
 }
 
-.spectrum__col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.spectrum__bar-wrap {
-  flex: 1;
-  width: 100%;
-  display: flex;
-  align-items: flex-end;
-  border-bottom: 2px solid rgba(0, 53, 59, 0.06);
-}
-
-.spectrum__bar {
-  width: 100%;
-  background: var(--brand-green);
-  border-radius: 3px 3px 0 0;
-  min-height: 2px;
-  transition: height 0.8s ease-out;
-}
-
-.spectrum__count {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--brand-green);
-  font-family: var(--font-headline);
-  margin-top: 4px;
-}
-
-.spectrum__label {
-  font-size: 10px;
+.summary-card__meta {
+  font-size: 13px;
   color: var(--brand-teal);
-  text-align: center;
-  line-height: 1.2;
+  opacity: 0.8;
+}
+
+/* Sentiment bar */
+.sentiment-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  gap: 2px;
+  margin: 8px 0 6px;
+}
+
+.sentiment-bar__fill {
+  border-radius: 4px;
+  min-width: 4px;
+}
+
+.sentiment-bar__fill--green {
+  background: var(--brand-green);
+}
+
+.sentiment-bar__fill--yellow {
+  background: var(--brand-yellow);
+}
+
+.sentiment-bar__fill--red {
+  background: #FF6B6B;
+}
+
+.sentiment-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--brand-teal);
 }
 
 /* Sections */
@@ -697,10 +700,6 @@
 
   .dashboard-summary {
     grid-template-columns: 1fr;
-  }
-
-  .summary-card--spectrum {
-    grid-column: 1;
   }
 
   .summary-card__number {
