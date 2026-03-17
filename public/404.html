@@ -4,11 +4,13 @@
   <meta charset="utf-8">
   <title>Redirecting...</title>
   <script>
-    // GitHub Pages SPA redirect: convert path to ?route= param
+    // GitHub Pages SPA redirect for /callrail-workshop-survey/ base path
+    var basePath = '/callrail-workshop-survey';
     var path = window.location.pathname;
-    var search = window.location.search;
-    var hash = window.location.hash;
-    window.location.replace('/' + '?route=' + encodeURIComponent(path) + (search ? '&' + search.slice(1) : '') + hash);
+    // Strip the base path to get the route
+    var route = path.startsWith(basePath) ? path.slice(basePath.length) : path;
+    if (!route) route = '/';
+    window.location.replace(basePath + '/?route=' + encodeURIComponent(route));
   </script>
 </head>
 <body>
