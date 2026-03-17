@@ -3,6 +3,7 @@ import { questions, sections } from './questions'
 import { submitSurvey } from './sanity'
 import QuestionBoard from './QuestionBoard'
 import logo from './assets/logo-symbol.png'
+import peaking from './assets/peaking.png'
 import './App.css'
 
 function QuestionBlock({ question, value, onChange, otherValue, onOtherChange }) {
@@ -169,6 +170,7 @@ export default function App() {
             <h1>Thank You!</h1>
             <p>Your responses have been recorded. See you on March 26th!</p>
           </div>
+          <img src={peaking} alt="" className="survey-hero__dino" />
         </div>
         <QuestionBoard email={email.trim().toLowerCase()} />
         <footer className="survey-footer">
@@ -192,6 +194,7 @@ export default function App() {
           <h1>Pre-Workshop Survey</h1>
           <p>Help us tailor the workshop to you. Takes about 2 minutes.</p>
         </div>
+        <img src={peaking} alt="" className="survey-hero__dino" />
       </div>
 
       <main className="survey-content">

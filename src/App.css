@@ -31,6 +31,8 @@
 .survey-hero {
   background: var(--color-bg-dark);
   padding: 48px 24px 56px;
+  position: relative;
+  overflow: hidden;
 }
 
 .survey-hero__inner {
@@ -53,6 +55,16 @@
   color: var(--brand-aqua);
   font-size: 18px;
   opacity: 0.85;
+}
+
+.survey-hero__dino {
+  position: absolute;
+  bottom: -10px;
+  right: 5%;
+  width: 200px;
+  height: auto;
+  opacity: 1;
+  pointer-events: none;
 }
 
 /* Content */
