@@ -606,62 +606,142 @@ export default function Results() {
               </label>
             </div>
 
-            {/* Respondent avatars */}
-            {responses && responses.length > 0 && (
-              <div className="respondent-avatars">
-                {responses
-                  .filter((r) => r.email)
-                  .map((r, i) => {
-                    const color = getAvatarColor(r.email)
-                    return (
-                      <div
-                        key={i}
-                        className="avatar"
-                        title={`Responded ${new Date(r.submittedAt).toLocaleDateString()}`}
-                        style={{ background: color.bg, color: color.fg, borderColor: color.border }}
-                      >
-                        {getInitials(r.email)}
-                      </div>
-                    )
-                  })}
+            {/* Dashboard summary */}
+            <div className="dashboard-summary">
+              {/* Responses card with avatars */}
+              <div className="summary-card summary-card--responses">
+                <div className="summary-card__header">
+                  <div className="summary-card__number">{total}</div>
+                  <div className="summary-card__label">Responses</div>
+                </div>
+                {responses && responses.length > 0 && (
+                  <div className="summary-card__avatars">
+                    {responses
+                      .filter((r) => r.email)
+                      .map((r, i) => {
+                        const color = getAvatarColor(r.email)
+                        return (
+                          <div
+                            key={i}
+                            className="avatar avatar--sm"
+                            title={getInitials(r.email)}
+                            style={{ background: color.bg, color: color.fg, borderColor: color.border }}
+                          >
+                            {getInitials(r.email)}
+                          </div>
+                        )
+                      })}
+                  </div>
+                )}
               </div>
-            )}
 
-            {/* Summary stats */}
-            <div className="results-stats">
-              <div className="stat">
-                <div className="stat__number">{total}</div>
-                <div className="stat__label">Responses</div>
-              </div>
-              {agg.q1_workflow && (
-                <div className="stat">
-                  <div className="stat__number">
-                    {(() => {
-                      const d = agg.q1_workflow
-                      const advanced = ['yolo', 'custom_commands', 'hooks', 'mcp', 'multi_agent']
-                      const advancedCount = advanced.reduce((sum, key) => sum + (d[key]?.count || 0), 0)
-                      const basic = ['chat', 'autocomplete']
-                      const basicCount = basic.reduce((sum, key) => sum + (d[key]?.count || 0), 0)
-                      return advancedCount > basicCount ? 'Advanced' : 'Getting Started'
-                    })()}
+              {/* Time split mini donut */}
+              {agg.q8_time_split && (() => {
+                const cc = agg.q8_time_split.crash_course?.count || 0
+                const adv = agg.q8_time_split.advanced?.count || 0
+                const voted = cc + adv
+                if (voted === 0) return null
+                const ccPct = cc / voted
+                const advPct = adv / voted
+                const size = 100
+                const cx = size / 2
+                const cy = size / 2
+                const r = 40
+                const ir = 26
+                // Draw two arcs: crash course and advanced
+                const ccAngle = ccPct * 2 * Math.PI
+                const startAngle = -Math.PI / 2
+                const ccEnd = startAngle + ccAngle
+                const advEnd = startAngle + 2 * Math.PI
+                const ccLargeArc = ccAngle > Math.PI ? 1 : 0
+                const advLargeArc = (2 * Math.PI - ccAngle) > Math.PI ? 1 : 0
+
+                const arc = (start, end, outerR, innerR, large) => {
+                  const x1o = cx + outerR * Math.cos(start)
+                  const y1o = cy + outerR * Math.sin(start)
+                  const x2o = cx + outerR * Math.cos(end)
+                  const y2o = cy + outerR * Math.sin(end)
+                  const x1i = cx + innerR * Math.cos(end)
+                  const y1i = cy + innerR * Math.sin(end)
+                  const x2i = cx + innerR * Math.cos(start)
+                  const y2i = cy + innerR * Math.sin(start)
+                  return `M${x1o},${y1o} A${outerR},${outerR} 0 ${large} 1 ${x2o},${y2o} L${x1i},${y1i} A${innerR},${innerR} 0 ${large} 0 ${x2i},${y2i} Z`
+                }
+
+                return (
+                  <div className="summary-card summary-card--split">
+                    <div className="summary-card__label">Wants Focus On</div>
+                    <div className="split-donut">
+                      <svg viewBox={`0 0 ${size} ${size}`} className="split-donut__svg">
+                        {cc > 0 && <path d={arc(startAngle, ccEnd, r, ir, ccLargeArc)} fill="var(--brand-aqua)" />}
+                        {adv > 0 && <path d={arc(ccEnd, advEnd, r, ir, advLargeArc)} fill="var(--brand-green)" />}
+                      </svg>
+                      <div className="split-donut__legend">
+                        <div className="split-donut__row">
+                          <span className="split-donut__swatch" style={{ background: 'var(--brand-aqua)' }} />
+                          <span className="split-donut__text">Crash Course</span>
+                          <span className="split-donut__val">{cc}</span>
+                        </div>
+                        <div className="split-donut__row">
+                          <span className="split-donut__swatch" style={{ background: 'var(--brand-green)' }} />
+                          <span className="split-donut__text">Advanced</span>
+                          <span className="split-donut__val">{adv}</span>
+                        </div>
+                        {(agg.q8_time_split.equal?.count || 0) > 0 && (
+                          <div className="split-donut__row split-donut__row--muted">
+                            <span className="split-donut__text">{agg.q8_time_split.equal.count} said equal</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="stat__label">Room Skew</div>
-                </div>
-              )}
-              {agg.q8_time_split && (
-                <div className="stat">
-                  <div className="stat__number">
-                    {(() => {
-                      const cc = agg.q8_time_split.crash_course?.count || 0
-                      const adv = agg.q8_time_split.advanced?.count || 0
-                      if (cc > adv) return 'Fundamentals'
-                      if (adv > cc) return 'Advanced'
-                      return 'Balanced'
-                    })()}
+                )
+              })()}
+
+              {/* Room capability spectrum */}
+              {agg.q1_workflow && (() => {
+                const d = agg.q1_workflow
+                const levels = [
+                  { key: 'chat', label: 'Chat' },
+                  { key: 'autocomplete', label: 'Autocomplete' },
+                  { key: 'ide_agent', label: 'IDE Agent' },
+                  { key: 'plan_mode', label: 'Plan Mode' },
+                  { key: 'context_mgmt', label: 'Context Mgmt' },
+                  { key: 'yolo', label: 'YOLO' },
+                  { key: 'custom_commands', label: 'Commands' },
+                  { key: 'hooks', label: 'Hooks' },
+                  { key: 'mcp', label: 'MCP' },
+                  { key: 'multi_agent', label: 'Multi-Agent' },
+                ]
+                const maxCount = Math.max(...levels.map((l) => d[l.key]?.count || 0), 1)
+
+                return (
+                  <div className="summary-card summary-card--spectrum">
+                    <div className="summary-card__label">Room Capability Spectrum</div>
+                    <div className="spectrum">
+                      {levels.map((level) => {
+                        const count = d[level.key]?.count || 0
+                        const intensity = count / maxCount
+                        return (
+                          <div key={level.key} className="spectrum__col">
+                            <div className="spectrum__bar-wrap">
+                              <div
+                                className="spectrum__bar"
+                                style={{
+                                  height: `${Math.max(intensity * 100, 4)}%`,
+                                  opacity: 0.2 + intensity * 0.8,
+                                }}
+                              />
+                            </div>
+                            <div className="spectrum__count">{count}</div>
+                            <div className="spectrum__label">{level.label}</div>
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
-                  <div className="stat__label">Wants Focus On</div>
-                </div>
-              )}
+                )
+              })()}
             </div>
 
             {/* Per-section results */}
