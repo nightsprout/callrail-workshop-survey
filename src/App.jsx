@@ -214,6 +214,18 @@ export default function App() {
                 placeholder="you@callrail.com"
               />
               {emailError && <div className="question__field-error">{emailError}</div>}
+              <button
+                type="button"
+                className="skip-to-board"
+                onClick={() => {
+                  setEmailTouched(true)
+                  const err = validateEmail(email)
+                  if (err) { setError(err); return }
+                  setSubmitted(true)
+                }}
+              >
+                Already submitted? Skip to Question Board &rarr;
+              </button>
             </div>
           </div>
 

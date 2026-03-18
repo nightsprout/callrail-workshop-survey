@@ -148,6 +148,24 @@
   color: #dc2626;
 }
 
+.skip-to-board {
+  margin-top: 12px;
+  background: none;
+  border: none;
+  color: var(--brand-teal);
+  font-size: 14px;
+  font-family: var(--font-body);
+  cursor: pointer;
+  opacity: 0.7;
+  padding: 0;
+  transition: opacity 0.15s;
+}
+
+.skip-to-board:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
 .question__other-input {
   width: 100%;
   font-family: var(--font-body);
