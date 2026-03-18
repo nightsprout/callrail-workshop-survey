@@ -10,7 +10,7 @@ export default function QuestionBoard({ email }) {
   const [error, setError] = useState(null)
 
   const DEFAULT_QUESTIONS = [
-    { _id: 'default-1', text: 'What is a token?', email: 'workshop@tyrannosaurustech.com', votes: [], createdAt: '2026-03-14T00:00:00Z' },
+    { _id: 'default-1', text: 'What is a token?', email: null, votes: [], createdAt: '2026-03-14T00:00:00Z' },
   ]
 
   const loadQuestions = useCallback(async () => {
@@ -129,8 +129,12 @@ export default function QuestionBoard({ email }) {
                 </button>
                 <div className="qboard__item-content">
                   <span className="qboard__item-text">{q.text}</span>
-                  <span className="qboard__item-author">{q.email?.split('@')[0]}</span>
                 </div>
+                {q.email && (
+                  <span className="qboard__item-avatar" title={q.email.split('@')[0]}>
+                    {q.email.split('@')[0].split('.').map(p => p[0]?.toUpperCase()).join('').slice(0, 2)}
+                  </span>
+                )}
               </li>
             )
           })}
