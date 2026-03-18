@@ -571,7 +571,7 @@ export default function Results() {
           </div>
         )}
 
-        {!loading && !error && total > 0 && (
+        {!loading && !error && allResponses && (
           <>
             <div className="results-filters">
               <label className="filter-toggle">
