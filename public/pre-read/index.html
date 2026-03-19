@@ -505,10 +505,10 @@ your-repo/
 <p>A command is a prompt template saved as a markdown file in <code>.claude/commands/</code> in your repo. It becomes a slash command anyone on your team can trigger manually.</p>
 
 <div class="callout term">
-  <strong>Command</strong> — A reusable prompt template saved as a markdown file in <code>.claude/commands/</code>. Becomes a slash command (like <code>/deploy-check</code> or <code>/do</code>) that you invoke explicitly.
+  <strong>Command</strong> — A reusable prompt template saved as a markdown file in <code>.claude/commands/</code>. Becomes a slash command (like <code>/deploy-check</code> or <code>/prime-context</code>) that you invoke explicitly.
 </div>
 
-<p>For example, a <code>/do</code> command might tell Claude to: stash uncommitted changes, create a new branch, implement a task, verify it works, then commit and open a PR. One command, full workflow. A <code>/prime</code> command might load all your project context at the start of a session.</p>
+<p>For example, a <code>/prime-context</code> command might read your key architecture docs, recent PRs, and open issues — loading all your project context at the start of a session. A <code>/deploy-check</code> command might run your test suite, verify the build, and open a PR. One command, full workflow.</p>
 
 <h3>Skills</h3>
 
@@ -645,7 +645,7 @@ your-repo/
   <dd>The message you send to AI. Can be conversational or structured. Better context produces better results.</dd>
 
   <dt>Command</dt>
-  <dd>A reusable prompt template saved in <code>.claude/commands/</code>. You trigger it manually with a slash command (e.g. <code>/do</code>).</dd>
+  <dd>A reusable prompt template saved in <code>.claude/commands/</code>. You trigger it manually with a slash command (e.g. <code>/prime-context</code>).</dd>
 
   <dt>Skill</dt>
   <dd>A markdown file in <code>.claude/skills/</code> that Claude discovers and uses automatically when relevant — no slash command needed.</dd>
@@ -693,7 +693,7 @@ your-repo/
   <label title="CLAUDE.md is a markdown file at your project root that Claude reads every session — your project's persistent memory for conventions, architecture, and standards."><input type="checkbox" /><span>I understand what <strong>CLAUDE.md</strong> is and why it matters.</span></label>
   <label title="Plan mode (Shift+Tab) makes Claude explore and propose a strategy before writing any code. Normal mode reads, writes, and executes immediately."><input type="checkbox" /><span>I can describe the difference between <strong>plan mode</strong> and normal mode.</span></label>
   <label title="Steering is working alongside Claude in real time, correcting course as it goes. Summoning is triggering Claude to work autonomously (e.g., @claude on a GitHub issue)."><input type="checkbox" /><span>I understand the difference between <strong>steering</strong> and <strong>summoning</strong>.</span></label>
-  <label title="Commands are prompt templates you trigger manually with slash commands (e.g. /do). Skills are discovered and used by Claude automatically when relevant — no slash needed. Both live as markdown in .claude/ and are version controlled."><input type="checkbox" /><span>I know the difference between <strong>skills</strong> and <strong>commands</strong> in Claude Code.</span></label>
+  <label title="Commands are prompt templates you trigger manually with slash commands (e.g. /prime-context). Skills are discovered and used by Claude automatically when relevant — no slash needed. Both live as markdown in .claude/ and are version controlled."><input type="checkbox" /><span>I know the difference between <strong>skills</strong> and <strong>commands</strong> in Claude Code.</span></label>
   <label title="Check status.anthropic.com for both outages and degraded performance. When Claude is down or struggling, switch tools, do code review, or update your CLAUDE.md."><input type="checkbox" /><span>I know to check <strong>status.anthropic.com</strong> when Claude is down or degraded.</span></label>
 </div>
 
