@@ -61,6 +61,7 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -70,6 +71,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
+  overflow-x: hidden;
+  overflow-wrap: break-word;
 }
 
 /* ==========================================================================
@@ -270,6 +273,7 @@ code {
   background: rgba(0, 53, 59, 0.07);
   padding: 2px 6px;
   border-radius: 3px;
+  word-break: break-word;
 }
 
 pre {
@@ -1189,6 +1193,33 @@ a.card:hover {
 
   .page-header__nav {
     gap: 16px;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .checklist {
+    padding: 16px 16px;
+  }
+
+  .callout {
+    padding: 12px 14px;
+  }
+
+  .toc {
+    padding: 16px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero--small h1 { font-size: 28px; }
+  .hero--small p { font-size: 15px; }
+
+  .page-header__title {
+    font-size: 16px;
   }
 }
 
