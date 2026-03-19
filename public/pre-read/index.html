@@ -40,7 +40,7 @@
       <li><a href="#claudemd">CLAUDE.md</a></li>
       <li><a href="#plan-mode">Plan Mode</a></li>
       <li><a href="#steering-and-summoning">Steering</a></li>
-      <li><a href="#skills-commands-extending">Skills</a></li>
+      <li><a href="#skills-commands-extending">Commands &amp; Skills</a></li>
       <li><a href="#when-things-go-wrong">When It Breaks</a></li>
       <li><a href="#glossary">Glossary</a></li>
       <li><a href="#readiness-checklist">Checklist</a></li>
@@ -196,17 +196,17 @@
 </section>
 
 <!-- ============================================ -->
-<!-- SECTION 3: What Makes Claude Code Different  -->
+<!-- SECTION 3: Agentic Coders                    -->
 <!-- ============================================ -->
 
 <section id="what-makes-cc-different">
-<h2>3. What Makes Claude Code Different</h2>
+<h2>3. Claude Code &amp; Other Agentic Coders</h2>
 
 <aside class="section-image">
   <img src="../images/slides/opening/why-claude-code-square.jpg" alt="Illustration: T-Rex holding glowing orb" />
 </aside>
 
-<p>You may have used GitHub Copilot, or ChatGPT, or even claude.ai for coding questions. Claude Code is fundamentally different from all of these. Understanding <em>how</em> it's different is the key to using it well.</p>
+<p>You may have used GitHub Copilot, or ChatGPT, or even claude.ai for coding questions. Claude Code — and agentic coders like it — are fundamentally different from all of these. Understanding <em>how</em> they're different is the key to using them well.</p>
 
 <h3>The spectrum</h3>
 
@@ -481,7 +481,7 @@ your-repo/
 <!-- ============================================ -->
 
 <section id="skills-commands-extending">
-<h2>9. Skills, Commands &amp; Extending</h2>
+<h2>9. Commands, Skills &amp; Extending</h2>
 
 <aside class="section-image">
   <img src="../images/slides/crash-course/extending-claude-square.jpg" alt="Illustration: glowing root system branching out" />
@@ -489,19 +489,27 @@ your-repo/
 
 <p>Everything so far has been about Claude's built-in capabilities. But the real power comes when you start customizing Claude for your specific workflows.</p>
 
-<h3>Skills and commands</h3>
+<h3>Commands</h3>
 
-<p>A skill is just a markdown file with instructions. You put it in <code>.claude/commands/</code> or <code>.claude/skills/</code> in your repo, and it becomes a slash command anyone on your team can use.</p>
+<p>A command is a prompt template saved as a markdown file in <code>.claude/commands/</code> in your repo. It becomes a slash command anyone on your team can trigger manually.</p>
 
 <div class="callout term">
-  <strong>Skill / Command</strong> — A reusable set of instructions saved as a markdown file in your repo's <code>.claude/</code> folder. Once saved, it becomes a slash command (like <code>/deploy-check</code>) that anyone on the team can run.
+  <strong>Command</strong> — A reusable prompt template saved as a markdown file in <code>.claude/commands/</code>. Becomes a slash command (like <code>/deploy-check</code> or <code>/do</code>) that you invoke explicitly.
 </div>
 
-<p>For example, a <code>/do</code> skill might tell Claude to: stash uncommitted changes, create a new branch, implement a task, verify it works, then commit and open a PR. One command, full workflow. A <code>/prime</code> skill might load all your project context at the start of a session.</p>
+<p>For example, a <code>/do</code> command might tell Claude to: stash uncommitted changes, create a new branch, implement a task, verify it works, then commit and open a PR. One command, full workflow. A <code>/prime</code> command might load all your project context at the start of a session.</p>
 
-<p>You can create skills by hand (they're just markdown) or by running <code>claude create skill</code>, which interviews you about your workflow and generates the file.</p>
+<h3>Skills</h3>
 
-<p>Because skills live in your repo, they're version controlled. When someone improves a skill, the whole team gets the improvement on their next pull.</p>
+<p>Skills live in <code>.claude/skills/</code> and work differently from commands: <strong>Claude finds and uses them automatically</strong> when they're relevant. You don't need to invoke them with a slash command — Claude reads the skill descriptions and decides when to apply them on its own.</p>
+
+<div class="callout term">
+  <strong>Skill</strong> — A markdown file in <code>.claude/skills/</code> that Claude discovers and uses automatically when relevant. Unlike commands, you don't trigger them — Claude reads the description and decides when to apply the instructions.
+</div>
+
+<p>You can create both by hand (they're just markdown) or by running <code>claude create skill</code> or <code>claude create command</code>, which interviews you about your workflow and generates the file.</p>
+
+<p>Because commands and skills live in your repo, they're version controlled. When someone improves one, the whole team gets the improvement on their next pull.</p>
 
 <h3>CLI tools: Claude already knows them</h3>
 
@@ -545,28 +553,30 @@ your-repo/
 
 <p>If you're hitting limits regularly, remember: that's usually a context management signal, not a subscription problem. Long conversations burn tokens fast. Use <code>/stats</code> to check your session usage, and <code>/clear</code> to start fresh when switching tasks.</p>
 
-<h3>Degraded performance</h3>
+<h3>Outages and degraded performance</h3>
 
-<p>Sometimes Claude is up but struggling — slow responses, timeouts, or noticeably worse output quality. When this happens, continuing to work wastes tokens on bad results. It's better to switch tools temporarily or do something else.</p>
+<p>Sometimes Claude is fully down; sometimes it's up but struggling — slow responses, timeouts, or noticeably worse output quality. Either way, check <a href="https://status.anthropic.com">status.anthropic.com</a> to see what's going on. When Claude isn't performing well, continuing to work wastes tokens on bad results.</p>
 
-<h3>Full outages</h3>
+<h3>When you hit limits or Claude is down</h3>
 
-<p>Check <a href="https://status.anthropic.com">status.anthropic.com</a> to confirm. If Claude is down, you're down — unless you have a backup plan.</p>
-
-<h3>The redirect playbook</h3>
-
-<p>When Claude isn't available or isn't performing well, use the downtime productively:</p>
+<p><strong>Switch to another agentic coder.</strong> Claude Code isn't the only game in town. When you're rate-limited or dealing with an outage, try one of these:</p>
 
 <ul>
-  <li>Switch to an alternative AI tool (Gemini, Copilot, Cursor) for immediate needs</li>
+  <li><strong>OpenAI Codex CLI</strong> — OpenAI's agentic coding tool. Works similarly to Claude Code but runs on GPT models. Good fallback when Claude is unavailable.</li>
+  <li><strong>Gemini CLI</strong> — Google's agentic CLI. Runs on Gemini models and has a generous free tier. Worth having installed as a backup.</li>
+  <li><strong>Cursor / Copilot</strong> — IDE-based alternatives if you prefer a visual environment while waiting.</li>
+</ul>
+
+<p>Having at least one alternative installed and configured means an outage is a minor inconvenience, not a blocked afternoon. The skills you're learning in this workshop — clear prompts, context management, CLAUDE.md — transfer directly to other agentic tools.</p>
+
+<p>When none of the AI tools are working for you, use the downtime productively:</p>
+
+<ul>
   <li>Do code review — the kind that benefits from human attention</li>
   <li>Update your CLAUDE.md and docs — make future sessions better</li>
   <li>Write handoff notes for your next Claude session</li>
-  <li>Run manual testing</li>
   <li>Plan upcoming work</li>
 </ul>
-
-<p>The engineers who stay most productive with AI are the ones who planned for this moment before it happened.</p>
 </section>
 
 <!-- ============================================ -->
@@ -610,8 +620,11 @@ your-repo/
   <dt>Prompt</dt>
   <dd>The message you send to AI. Can be conversational or structured. Better context produces better results.</dd>
 
-  <dt>Skill / Command</dt>
-  <dd>A reusable workflow saved as a markdown file in <code>.claude/commands/</code>. Becomes a slash command for your whole team.</dd>
+  <dt>Command</dt>
+  <dd>A reusable prompt template saved in <code>.claude/commands/</code>. You trigger it manually with a slash command (e.g. <code>/do</code>).</dd>
+
+  <dt>Skill</dt>
+  <dd>A markdown file in <code>.claude/skills/</code> that Claude discovers and uses automatically when relevant — no slash command needed.</dd>
 
   <dt>Steering</dt>
   <dd>Working alongside Claude in real time — watching, correcting course, providing guidance as it works.</dd>
@@ -656,7 +669,7 @@ your-repo/
   <label title="CLAUDE.md is a markdown file at your project root that Claude reads every session — your project's persistent memory for conventions, architecture, and standards."><input type="checkbox" /><span>I understand what <strong>CLAUDE.md</strong> is and why it matters.</span></label>
   <label title="Plan mode (Shift+Tab) makes Claude explore and propose a strategy before writing any code. Normal mode reads, writes, and executes immediately."><input type="checkbox" /><span>I can describe the difference between <strong>plan mode</strong> and normal mode.</span></label>
   <label title="Steering is working alongside Claude in real time, correcting course as it goes. Summoning is triggering Claude to work autonomously (e.g., @claude on a GitHub issue)."><input type="checkbox" /><span>I understand the difference between <strong>steering</strong> and <strong>summoning</strong>.</span></label>
-  <label title="Skills are automatically discovered and used by Claude when relevant. Commands are prompt templates you trigger manually with slash commands. Both live as markdown files in .claude/ and are version controlled with your repo."><input type="checkbox" /><span>I know the difference between <strong>skills</strong> and <strong>commands</strong> in Claude Code.</span></label>
+  <label title="Commands are prompt templates you trigger manually with slash commands (e.g. /do). Skills are discovered and used by Claude automatically when relevant — no slash needed. Both live as markdown in .claude/ and are version controlled."><input type="checkbox" /><span>I know the difference between <strong>skills</strong> and <strong>commands</strong> in Claude Code.</span></label>
   <label title="Check status.anthropic.com for both outages and degraded performance. When Claude is down or struggling, switch tools, do code review, or update your CLAUDE.md."><input type="checkbox" /><span>I know to check <strong>status.anthropic.com</strong> when Claude is down or degraded.</span></label>
 </div>
 
