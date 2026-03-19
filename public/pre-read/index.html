@@ -131,6 +131,38 @@
 
 <p>The key thing to know: <strong>claude.ai and Claude Code share the same subscription</strong>. The API is separate. You don't need API access for anything we cover in the workshop.</p>
 
+<h3>The Desktop app: three modes in one</h3>
+
+<p>The Claude Desktop app puts all of this in a single native application with three tabs: <strong>Chat</strong>, <strong>Cowork</strong>, and <strong>Code</strong>. Each mode is designed for different kinds of work.</p>
+
+<table>
+  <thead>
+    <tr><th></th><th>Chat</th><th>Cowork</th><th>Code</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>What it is</strong></td><td>Quick conversations</td><td>Sustained knowledge work</td><td>Full development environment</td></tr>
+    <tr><td><strong>Best for</strong></td><td>Questions, brainstorming, drafting</td><td>Research, analysis, document creation</td><td>Writing code, running tests, git</td></tr>
+    <tr><td><strong>File access</strong></td><td>Screenshots and shared windows</td><td>Folders you explicitly share</td><td>Full project filesystem + terminal</td></tr>
+    <tr><td><strong>Works alone?</strong></td><td>No — conversational</td><td>Yes — runs tasks independently</td><td>Yes — runs tasks independently</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Chat</strong> is what you'd expect — the same Claude from claude.ai, but running natively on your machine. Double-tap Option (Mac) to pull it up over any window for quick questions.</p>
+
+<p><strong>Cowork</strong> is for work that takes real effort. Give Claude a folder and a task — "research these three competitors and write a summary" or "analyze this contract and flag risks" — and it reads what's there, works through it, and saves finished output back. It can even run on a schedule for recurring tasks like daily briefings. Think of it as a capable research assistant with access to your files.</p>
+
+<p><strong>Code</strong> is the same Claude Code engine that runs in your terminal, but inside the desktop app with visual diffs and a built-in terminal. It has three interaction sub-modes:</p>
+
+<ul>
+  <li><strong>Ask:</strong> Claude proposes every change with a visual diff — you review and approve before anything is modified</li>
+  <li><strong>Code:</strong> Changes apply automatically, but terminal commands still require approval</li>
+  <li><strong>Plan:</strong> Claude outlines a strategy before executing anything (same concept as plan mode in the CLI)</li>
+</ul>
+
+<p>The important thing to understand: <strong>Cowork and Code run on the same engine underneath.</strong> Both can work independently, spin up sub-agents for parallel tasks, and sustain long-running work. The difference is scope — Code has your full project and terminal, Cowork is limited to the folders you share.</p>
+
+<p>In the workshop, we'll focus on Claude Code (the CLI), but everything you learn about prompting, context management, and CLAUDE.md applies across all three modes.</p>
+
 <h3>The model family</h3>
 
 <p>Under the hood, Claude comes in different sizes — each with different tradeoffs between speed, cost, and capability.</p>
@@ -553,6 +585,9 @@ your-repo/
   <dt>Agentic</dt>
   <dd>An AI that takes actions autonomously — reads files, runs commands, writes code, iterates on results — rather than just answering questions.</dd>
 
+  <dt>Chat / Cowork / Code</dt>
+  <dd>The three modes in the Claude Desktop app. Chat is for quick conversations. Cowork handles sustained knowledge work with access to shared folders. Code is a full development environment with terminal access. Cowork and Code run on the same engine.</dd>
+
   <dt>CLI (Command Line Interface)</dt>
   <dd>Claude Code runs in your terminal, giving it access to your filesystem, git, and every CLI tool you have installed.</dd>
 
@@ -616,17 +651,18 @@ your-repo/
 <p>Before the workshop, you should be comfortable with these concepts. You don't need to have them memorized — just familiar enough that they're not brand new when they come up.</p>
 
 <div class="checklist">
-  <label title="A token is ~3/4 of a word. The context window (~1M tokens) is Claude's working memory — your messages, its responses, files read, command outputs. The entire history rides with every message, so longer conversations burn more tokens and get worse."><input type="checkbox" /> I understand what <strong>tokens</strong> and the <strong>context window</strong> are, and why longer conversations degrade.</label>
-  <label title="Every new conversation starts from zero. Claude has no memory of yesterday's work. Everything it knows comes from what's in the current context window — your messages, files read, CLAUDE.md."><input type="checkbox" /> I understand why AI <strong>starts blank</strong> every session and doesn't remember previous conversations.</label>
-  <label title="claude.ai is the browser chat. Claude Code is the terminal coding agent. Claude Desktop is the native app for richer conversations. VS Code extensions (Copilot, Continue, etc.) add AI inline in your editor. Claude Code and claude.ai share a subscription."><input type="checkbox" /> I know the difference between <strong>claude.ai</strong>, <strong>Claude Code</strong>, <strong>Claude Desktop</strong>, and <strong>VS Code extensions</strong>.</label>
-  <label title="Subscriptions (Pro/Max) give you claude.ai + Claude Code for a flat monthly fee. The API is pay-per-token and separate — used for building AI into your own products, not for day-to-day coding."><input type="checkbox" /> I understand how <strong>API billing</strong> differs from a <strong>subscription</strong>.</label>
-  <label title="Agentic means Claude doesn't just suggest code — it reads files, runs commands, creates branches, writes code, and iterates autonomously. You describe what; it figures out how."><input type="checkbox" /> I can explain what makes Claude Code <strong>agentic</strong> vs. autocomplete tools.</label>
-  <label title="/clear wipes history and starts fresh. /plan switches to plan mode so Claude thinks before building. /stats shows your session's usage patterns."><input type="checkbox" /> I know what <strong>/clear</strong>, <strong>/plan</strong>, and <strong>/stats</strong> do.</label>
-  <label title="CLAUDE.md is a markdown file at your project root that Claude reads every session — your project's persistent memory for conventions, architecture, and standards."><input type="checkbox" /> I understand what <strong>CLAUDE.md</strong> is and why it matters.</label>
-  <label title="Plan mode (Shift+Tab) makes Claude explore and propose a strategy before writing any code. Normal mode reads, writes, and executes immediately."><input type="checkbox" /> I can describe the difference between <strong>plan mode</strong> and normal mode.</label>
-  <label title="Steering is working alongside Claude in real time, correcting course as it goes. Summoning is triggering Claude to work autonomously (e.g., @claude on a GitHub issue)."><input type="checkbox" /> I understand the difference between <strong>steering</strong> and <strong>summoning</strong>.</label>
-  <label title="Skills are automatically discovered and used by Claude when relevant. Commands are prompt templates you trigger manually with slash commands. Both live as markdown files in .claude/ and are version controlled with your repo."><input type="checkbox" /> I know the difference between <strong>skills</strong> and <strong>commands</strong> in Claude Code.</label>
-  <label title="Check status.anthropic.com for both outages and degraded performance. When Claude is down or struggling, switch tools, do code review, or update your CLAUDE.md."><input type="checkbox" /> I know to check <strong>status.anthropic.com</strong> when Claude is down or degraded.</label>
+  <label title="A token is ~3/4 of a word. The context window (~1M tokens) is Claude's working memory — your messages, its responses, files read, command outputs. The entire history rides with every message, so longer conversations burn more tokens and get worse."><input type="checkbox" /><span>I understand what <strong>tokens</strong> and the <strong>context window</strong> are, and why longer conversations degrade.</span></label>
+  <label title="Every new conversation starts from zero. Claude has no memory of yesterday's work. Everything it knows comes from what's in the current context window — your messages, files read, CLAUDE.md."><input type="checkbox" /><span>I understand why AI <strong>starts blank</strong> every session and doesn't remember previous conversations.</span></label>
+  <label title="claude.ai is the browser chat. Claude Code is the terminal coding agent. Claude Desktop is the native app for richer conversations. VS Code extensions (Copilot, Continue, etc.) add AI inline in your editor. Claude Code and claude.ai share a subscription."><input type="checkbox" /><span>I know the difference between <strong>claude.ai</strong>, <strong>Claude Code</strong>, <strong>Claude Desktop</strong>, and <strong>VS Code extensions</strong>.</span></label>
+  <label title="Subscriptions (Pro/Max) give you claude.ai + Claude Code for a flat monthly fee. The API is pay-per-token and separate — used for building AI into your own products, not for day-to-day coding."><input type="checkbox" /><span>I understand how <strong>API billing</strong> differs from a <strong>subscription</strong>.</span></label>
+  <label title="Chat is for quick conversations. Cowork handles sustained research and document creation with shared folder access. Code is a full dev environment with terminal and git. Cowork and Code run on the same engine."><input type="checkbox" /><span>I know the three Desktop app modes — <strong>Chat</strong>, <strong>Cowork</strong>, and <strong>Code</strong> — and when to use each.</span></label>
+  <label title="Agentic means Claude doesn't just suggest code — it reads files, runs commands, creates branches, writes code, and iterates autonomously. You describe what; it figures out how."><input type="checkbox" /><span>I can explain what makes Claude Code <strong>agentic</strong> vs. autocomplete tools.</span></label>
+  <label title="/clear wipes history and starts fresh. /plan switches to plan mode so Claude thinks before building. /stats shows your session's usage patterns."><input type="checkbox" /><span>I know what <strong>/clear</strong>, <strong>/plan</strong>, and <strong>/stats</strong> do.</span></label>
+  <label title="CLAUDE.md is a markdown file at your project root that Claude reads every session — your project's persistent memory for conventions, architecture, and standards."><input type="checkbox" /><span>I understand what <strong>CLAUDE.md</strong> is and why it matters.</span></label>
+  <label title="Plan mode (Shift+Tab) makes Claude explore and propose a strategy before writing any code. Normal mode reads, writes, and executes immediately."><input type="checkbox" /><span>I can describe the difference between <strong>plan mode</strong> and normal mode.</span></label>
+  <label title="Steering is working alongside Claude in real time, correcting course as it goes. Summoning is triggering Claude to work autonomously (e.g., @claude on a GitHub issue)."><input type="checkbox" /><span>I understand the difference between <strong>steering</strong> and <strong>summoning</strong>.</span></label>
+  <label title="Skills are automatically discovered and used by Claude when relevant. Commands are prompt templates you trigger manually with slash commands. Both live as markdown files in .claude/ and are version controlled with your repo."><input type="checkbox" /><span>I know the difference between <strong>skills</strong> and <strong>commands</strong> in Claude Code.</span></label>
+  <label title="Check status.anthropic.com for both outages and degraded performance. When Claude is down or struggling, switch tools, do code review, or update your CLAUDE.md."><input type="checkbox" /><span>I know to check <strong>status.anthropic.com</strong> when Claude is down or degraded.</span></label>
 </div>
 
 <p>If any of these feel unclear, re-read the relevant section above — or ask Claude! One of the best ways to learn about Claude is to use Claude.</p>
