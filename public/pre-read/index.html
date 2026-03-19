@@ -51,6 +51,7 @@
       <li><a href="#steering-and-summoning">Steering</a></li>
       <li><a href="#skills-commands-extending">Commands &amp; Skills</a></li>
       <li><a href="#when-things-go-wrong">When It Breaks</a></li>
+      <li><a href="#the-landscape">The Landscape</a></li>
       <li><a href="#glossary">Glossary</a></li>
       <li><a href="#readiness-checklist">Checklist</a></li>
     </ol>
@@ -72,14 +73,37 @@
   <img src="../images/slides/mental-model-square.jpg" alt="Illustration: T-Rex opening a glowing treasure chest — discovering what's inside AI" />
 </aside>
 
-<p>Every interaction with AI runs on the same basic loop: you send text in, the model processes it, and text comes back. Understanding what's happening under the hood helps you debug problems and get better results.</p>
+<p>If you're coming from ChatGPT, one thing might surprise you: how much everything in Claude — and AI engineering broadly — revolves around <strong>tokens</strong>. Token limits. Token costs. Context tokens. Output tokens. The word comes up constantly because tokens are the fundamental unit of everything happening under the hood. Understanding them at an engineering level makes everything else click.</p>
 
-<h3>It starts with tokens</h3>
+<h3>What tokens actually are (and why)</h3>
 
-<p>AI doesn't read words the way you do. It breaks everything down into <strong>tokens</strong> — fragments of text, roughly three-quarters of a word each. The word "development" is 2 tokens. "CallRail" is 2 tokens. A short paragraph might be 50 tokens. A full source file could be thousands.</p>
+<p>AI doesn't read characters or words. It reads <strong>tokens</strong> — subword units that represent a deliberate engineering tradeoff. If you've ever thought about text encoding or compression, the reasoning will feel familiar.</p>
+
+<p>Consider three approaches to chunking text for a neural network:</p>
+
+<table>
+  <thead>
+    <tr><th>Approach</th><th>Vocabulary size</th><th>Tradeoff</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Characters</strong></td><td>~256 entries</td><td>Tiny vocabulary, but "function" takes 8 tokens. Sequences get unmanageably long, and the model has to learn what letters mean when grouped — like reading letter-by-letter instead of words.</td></tr>
+    <tr><td><strong>Whole words</strong></td><td>Millions</td><td>"run", "runs", "running", "runner" each need their own entry. Add code identifiers, proper nouns, compound words — the dictionary explodes and you still can't handle words you've never seen.</td></tr>
+    <tr><td><strong>Subwords</strong></td><td>~100K entries</td><td>The sweet spot. Common words like "the" are one token. Less common words split intelligently: "tokenization" → "token" + "ization". Manageable dictionary that can represent any text.</td></tr>
+  </tbody>
+</table>
+
+<p>Modern LLMs use <strong>subword tokenization</strong> — usually a variant of Byte Pair Encoding (BPE). The algorithm scans a massive training corpus, finds the most frequent character pairs, and iteratively merges them into single tokens. The result: common patterns — English words, code keywords, frequent prefixes and suffixes — get compact, single-token representations, while rare strings decompose into smaller pieces the model already knows.</p>
+
+<p>A few things useful to know as an engineer:</p>
+
+<ul>
+  <li><strong>Code tokenizes differently than prose.</strong> Common keywords like <code>function</code>, <code>return</code>, and <code>import</code> are often single tokens. But your variable names and domain-specific identifiers get split. Whitespace and indentation cost tokens too — one reason minified code is cheaper to process.</li>
+  <li><strong>Non-English text burns more tokens.</strong> The training corpus is English-heavy, so English words get the most efficient encodings. CJK characters, Cyrillic, and emoji all cost more tokens for the same semantic content.</li>
+  <li><strong>The ¾ rule of thumb.</strong> For English prose, 1 token ≈ 4 characters ≈ ¾ of a word. "CallRail" is 2 tokens. A short paragraph is ~50 tokens. A full source file could be thousands.</li>
+</ul>
 
 <div class="callout term">
-  <strong>Token</strong> — The smallest unit of text AI processes. Roughly 3/4 of a word. Everything you send, everything AI reads, everything it generates — all measured in tokens.
+  <strong>Token</strong> — A subword unit, typically 3–4 characters of English text. The model's native unit of input and output. Everything — prompts, file reads, generated code — is measured in tokens. Tokenization is also why AI sometimes splits words oddly or miscounts characters: it doesn't "see" individual letters.
 </div>
 
 <p>Tokens matter because they're what you're paying for. Every file Claude reads, every command output it processes, every response it writes — all tokens. A long conversation isn't just slower, it's literally more expensive per message, because the <em>entire conversation history</em> rides along with every new message you send.</p>
@@ -182,13 +206,46 @@
     <tr><th>Model</th><th>What it is</th><th>When to use it</th></tr>
   </thead>
   <tbody>
-    <tr><td><strong>Haiku</strong></td><td>Fast, lightweight, cheap</td><td>Quick tasks, high-volume operations</td></tr>
-    <tr><td><strong>Sonnet</strong></td><td>Balanced speed + intelligence</td><td>Day-to-day work, most tasks</td></tr>
-    <tr><td><strong>Opus</strong></td><td>Most capable, deepest reasoning</td><td>Complex architecture, hard problems</td></tr>
+    <tr><td><strong>Haiku</strong></td><td>Fast, lightweight, cheap</td><td>Quick lookups, high-volume operations, background tasks</td></tr>
+    <tr><td><strong>Sonnet</strong></td><td>Balanced speed + intelligence</td><td>Routine subtasks — Claude Code auto-dispatches Sonnet for file searches and simple operations</td></tr>
+    <tr><td><strong>Opus</strong></td><td>Most capable, deepest reasoning</td><td>Day-to-day engineering work — the default for Claude Code and what we recommend</td></tr>
   </tbody>
 </table>
 
 <p>Claude Code uses Opus by default and automatically dispatches Sonnet for routine operations like file searches. You don't need to manage this — it handles model selection for you.</p>
+
+<h3>Modalities: beyond text</h3>
+
+<p>A <strong>modality</strong> is a type of data a model can work with — text, images, audio, video. Early LLMs were text-only: text in, text out. Modern models are increasingly <strong>multimodal</strong>, meaning they can process (and sometimes generate) multiple types of data natively.</p>
+
+<p>This matters practically because it determines what you can <em>do</em> with a model. Can you paste a screenshot of a bug and ask "what's wrong?" Can you feed it a design mockup and say "implement this?" Can you have it listen to a meeting recording?</p>
+
+<div class="callout term">
+  <strong>Multimodal</strong> — A model that can process more than just text. Claude can analyze images, PDFs, and code alongside text. Other models add audio and video input, or generate images natively. More modalities = more ways to interact.
+</div>
+
+<h4>Multimodal comparison matrix</h4>
+
+<table>
+  <thead>
+    <tr><th>Capability</th><th>Claude</th><th>ChatGPT / GPT</th><th>Gemini</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Text in → text out</strong></td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
+    <tr><td><strong>Image input</strong> (vision)</td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
+    <tr><td><strong>PDF / document input</strong></td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
+    <tr><td><strong>Image generation</strong></td><td>&#10007;</td><td>&#10003; (DALL-E / native)</td><td>&#10003; (Imagen)</td></tr>
+    <tr><td><strong>Audio input</strong></td><td>&#10007;</td><td>&#10003; (native voice)</td><td>&#10003; (native voice)</td></tr>
+    <tr><td><strong>Video input</strong></td><td>&#10007;</td><td>&#10003; (limited)</td><td>&#10003; (native, long context)</td></tr>
+    <tr><td><strong>Code execution</strong></td><td>&#10003; (terminal access)</td><td>&#10003; (sandbox)</td><td>&#10003; (sandbox)</td></tr>
+    <tr><td><strong>Web search</strong></td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
+    <tr><td><strong>Tool use / function calling</strong></td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
+  </tbody>
+</table>
+
+<p>Claude's strengths are in text reasoning, code generation, and instruction following — it's consistently the strongest model for agentic coding tasks. Where it trades off is in media generation and non-text input. For the workshop, this is ideal: we're focused on code, not image generation.</p>
+
+<p>One practical Claude Code tip: you <em>can</em> paste screenshots directly into your terminal session. This is surprisingly useful for implementing designs from mockups, debugging visual bugs from screenshots, or reading error messages someone sends you in Slack.</p>
 
 <h3>What you're paying for</h3>
 
@@ -199,6 +256,7 @@
   <tbody>
     <tr><td>Pro</td><td>$20</td><td>Light use — a few hours before hitting limits</td></tr>
     <tr><td>Max 5x</td><td>$100</td><td>Full workday sustained use</td></tr>
+    <tr><td>Team</td><td>$150/member</td><td>Centralized billing, admin controls, usage visibility across the org</td></tr>
     <tr><td>Max 20x</td><td>$200</td><td>Heavy use, parallel work</td></tr>
   </tbody>
 </table>
@@ -223,9 +281,9 @@
 
 <p>Think of AI coding tools on a spectrum:</p>
 
-<p><strong>Autocomplete → Copilot → Chat → Agentic</strong></p>
+<p><strong>Autocomplete → Chat (copy/paste) → Inline Editing → Agentic</strong></p>
 
-<p>Autocomplete suggests the next line. Copilot suggests blocks of code as you type. Chat tools answer questions about code. <strong>Agentic tools do the work.</strong></p>
+<p>Autocomplete suggests the next line. Chat tools answer questions you copy back into your editor. Inline editors suggest changes in context. <strong>Agentic tools do the work.</strong></p>
 
 <div class="callout term">
   <strong>Agentic</strong> — An AI that doesn't just answer questions — it takes actions. It reads your files, runs commands, creates branches, writes code, runs tests, and iterates on its own work. You describe what you want; it figures out how to get there.
@@ -636,6 +694,56 @@ your-repo/
 </section>
 
 <!-- ============================================ -->
+<!-- SECTION: The Landscape                       -->
+<!-- ============================================ -->
+
+<section id="the-landscape">
+<h2>12. The Landscape</h2>
+
+<aside class="section-image">
+  <img src="../images/slides/ai-landscape-square.jpg" alt="Illustration: Fantasy treasure map of AI territories — crystals (Anthropic), cloud towers (OpenAI), volcanoes (Google), fortress (Microsoft), llama grasslands (Meta) — with T-Rex at the center holding a compass" />
+</aside>
+
+<p>AI moves fast. It helps to know who the major players are, what they call their products, and a few terms that come up constantly.</p>
+
+<h3>The big players</h3>
+
+<table>
+  <thead>
+    <tr><th>Company</th><th>Models</th><th>Products you'll hear about</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Anthropic</strong></td><td>Claude Opus 4.6, Sonnet 4.5, Haiku 4.5</td><td>claude.ai, Claude Code, Claude Desktop</td></tr>
+    <tr><td><strong>OpenAI</strong></td><td>GPT-5.4, GPT-5.3-Codex</td><td>ChatGPT, Codex (desktop app + cloud agents), API</td></tr>
+    <tr><td><strong>Google</strong></td><td>Gemini 3.1 Pro, Gemini Flash</td><td>Gemini app, Gemini Code Assist, AI Studio</td></tr>
+    <tr><td><strong>Microsoft</strong></td><td>Wraps OpenAI models</td><td>GitHub Copilot (4.7M subscribers), Copilot in VS Code / Visual Studio, Azure OpenAI</td></tr>
+    <tr><td><strong>Meta</strong></td><td>Llama 4 (Scout, Maverick) — open-weight</td><td>No consumer product — Llama is the leading open-weight model family. Scout offers a 10M token context window. Used by others to build products and run locally.</td></tr>
+  </tbody>
+</table>
+
+<h3>Terms worth knowing</h3>
+
+<dl class="glossary">
+  <dt>Frontier model</dt>
+  <dd>The most capable models pushing the state of the art. Claude Opus 4.6, GPT-5.4, and Gemini 3.1 Pro are today's frontier models — and for the first time, they're within a percentage point of each other on major coding benchmarks. These are what you want for complex engineering tasks.</dd>
+
+  <dt>Open-weight / open-source</dt>
+  <dd>Models whose weights are publicly available — Meta's Llama 4 family is the leader, with Mistral also notable. You can run them locally or host them yourself. Generally less capable than frontier models but free and private. "Open-weight" means the weights are public but the training data and process aren't — an important distinction.</dd>
+
+  <dt>Parameters</dt>
+  <dd>The "size" of a model — the number of learned values in its neural network. Llama 3 comes in 8B and 70B parameter versions. More parameters generally means more capable but slower and more expensive. Frontier model sizes are typically not disclosed.</dd>
+
+  <dt>Inference</dt>
+  <dd>Running a trained model to get output — as opposed to training it. Every time you send Claude a message, that's inference. When people talk about "inference costs," they mean the cost of generating responses (tokens out).</dd>
+
+  <dt>Fine-tuning</dt>
+  <dd>Taking a pre-trained model and training it further on specific data to specialize it. Common with open-weight models. Not something you do with Claude or ChatGPT directly — instead, you steer them with prompts and context.</dd>
+</dl>
+
+<p>The landscape changes fast, but the fundamentals — tokens, context, prompting, agentic workflows — are stable across all of these. What you learn with Claude transfers.</p>
+</section>
+
+<!-- ============================================ -->
 <!-- GLOSSARY                                     -->
 <!-- ============================================ -->
 
@@ -667,8 +775,14 @@ your-repo/
   <dt>MCP (Model Context Protocol)</dt>
   <dd>A plugin system for giving Claude structured access to external tools and services. Use when CLI isn't an option.</dd>
 
+  <dt>Modality</dt>
+  <dd>A type of data a model can work with — text, images, audio, video. Models that handle multiple types are called multimodal.</dd>
+
   <dt>Model</dt>
-  <dd>The AI brain itself. Claude comes in Haiku (fast/cheap), Sonnet (balanced), and Opus (most capable).</dd>
+  <dd>The AI brain itself. Claude comes in Haiku (fast/cheap), Sonnet (balanced), and Opus (most capable — recommended for daily engineering work).</dd>
+
+  <dt>Multimodal</dt>
+  <dd>A model that can process more than just text. Claude handles text + images + PDFs. Other models add audio, video, and image generation.</dd>
 
   <dt>Plan mode</dt>
   <dd>A mode where Claude explores and proposes a strategy before making changes. Enter with Shift+Tab or by typing "plan."</dd>
@@ -689,7 +803,7 @@ your-repo/
   <dd>Triggering Claude to work autonomously via GitHub @mentions, Slack commands, or other integrations.</dd>
 
   <dt>Token</dt>
-  <dd>The smallest unit of text AI processes. Roughly 3/4 of a word. Everything — input, output, file reads — is measured in tokens.</dd>
+  <dd>A subword unit (~4 characters of English text) created by Byte Pair Encoding. The native unit of all LLM input and output. Common words = 1 token; rare words split into pieces. Code, non-English text, and encoded strings tokenize less efficiently.</dd>
 
   <dt>/clear</dt>
   <dd>Wipes conversation history and starts a fresh session. Use when switching tasks or when context is polluted.</dd>
@@ -715,8 +829,9 @@ your-repo/
 <p>Before the workshop, you should be comfortable with these concepts. You don't need to have them memorized — just familiar enough that they're not brand new when they come up.</p>
 
 <div class="checklist">
-  <label title="A token is ~3/4 of a word. The context window (~1M tokens) is Claude's working memory — your messages, its responses, files read, command outputs. The entire history rides with every message, so longer conversations burn more tokens and get worse."><input type="checkbox" /><span>I understand what <strong>tokens</strong> and the <strong>context window</strong> are, and why longer conversations degrade.</span></label>
+  <label title="Tokens are subword units (~4 chars each) created by Byte Pair Encoding — a compression sweet spot between characters and whole words. The context window (~200K tokens, 1M announced) is Claude's working memory. The entire history rides with every message, so longer conversations burn more tokens and get worse."><input type="checkbox" /><span>I understand what <strong>tokens</strong> are (subword units, BPE), what the <strong>context window</strong> is, and why longer conversations degrade.</span></label>
   <label title="Every new conversation starts from zero. Claude has no memory of yesterday's work. Everything it knows comes from what's in the current context window — your messages, files read, CLAUDE.md."><input type="checkbox" /><span>I understand why AI <strong>starts blank</strong> every session and doesn't remember previous conversations.</span></label>
+  <label title="A modality is a data type (text, image, audio, video). Claude excels at text + code and can read images/PDFs. Other models add audio/video input and image generation. Claude trades off media generation for stronger code reasoning."><input type="checkbox" /><span>I understand what <strong>multimodal</strong> means and where Claude's modality strengths and tradeoffs are.</span></label>
   <label title="claude.ai is the browser chat. Claude Code is the terminal coding agent. Claude Desktop is the native app for richer conversations. VS Code extensions (Copilot, Continue, etc.) add AI inline in your editor. Claude Code and claude.ai share a subscription."><input type="checkbox" /><span>I know the difference between <strong>claude.ai</strong>, <strong>Claude Code</strong>, <strong>Claude Desktop</strong>, and <strong>VS Code extensions</strong>.</span></label>
   <label title="Subscriptions (Pro/Max) give you claude.ai + Claude Code for a flat monthly fee. The API is pay-per-token and separate — used for building AI into your own products, not for day-to-day coding."><input type="checkbox" /><span>I understand how <strong>API billing</strong> differs from a <strong>subscription</strong>.</span></label>
   <label title="Chat is for quick conversations. Cowork handles sustained research and document creation with shared folder access. Code is a full dev environment with terminal and git. Cowork and Code run on the same engine."><input type="checkbox" /><span>I know the three Desktop app modes — <strong>Chat</strong>, <strong>Cowork</strong>, and <strong>Code</strong> — and when to use each.</span></label>
