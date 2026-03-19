@@ -354,6 +354,22 @@
 <div class="callout term">
   <strong>CLI</strong> — Command Line Interface. Claude Code runs in your terminal alongside your other dev tools. This gives it access to your filesystem, git, and every CLI tool you have installed.
 </div>
+
+<h3>The permission model</h3>
+
+<p>Having an agent with access to your entire filesystem and terminal sounds dangerous — and it would be, without guardrails. Claude Code has a built-in permission system that keeps you in control.</p>
+
+<p>By default, Claude can <strong>read</strong> files on its own, but <strong>writing files, editing code, and running shell commands</strong> all require your explicit approval. Every time Claude wants to take an action, it shows you exactly what it's about to do — the file it wants to edit, the diff it wants to apply, the command it wants to run — and waits for you to approve or reject it.</p>
+
+<p>This means you're always in the loop. You can review every change before it happens, say no to anything that looks wrong, and build trust incrementally as you see how Claude works in your codebase.</p>
+
+<h4>Configuring permissions</h4>
+
+<p>Approving every single <code>git status</code> and <code>ls</code> gets tedious fast. Claude Code lets you <strong>allowlist</strong> specific tools and commands so they run without prompting. You can do this per-project (in <code>.claude/settings.json</code>) or globally (in <code>~/.claude/settings.json</code>).</p>
+
+<p>For example, you might allow read-only git commands like <code>git status</code>, <code>git diff</code>, and <code>git log</code> to run freely, while still requiring approval for <code>git commit</code>, <code>git push</code>, and file edits. This gives you a middle ground: less friction on safe operations, full oversight on things that matter.</p>
+
+<p>We'll explore permission configuration hands-on during the workshop — for now, just know that the default "ask before acting" model is there for good reason, and there's a spectrum of control you can dial in over time.</p>
 </section>
 
 <!-- ============================================ -->
@@ -832,6 +848,9 @@ your-repo/
   <dt>Hooks</dt>
   <dd>Your code that runs automatically before or after Claude takes actions — notifications, linting, validation.</dd>
 
+  <dt>Permissions / Allowlisting</dt>
+  <dd>Claude Code's safety model: reads are automatic, but file writes and shell commands require your approval. You can allowlist specific tools in <code>.claude/settings.json</code> to skip the prompt for safe operations.</dd>
+
   <dt>MCP (Model Context Protocol)</dt>
   <dd>A plugin system for giving Claude structured access to external tools and services. Use when CLI isn't an option.</dd>
 
@@ -894,6 +913,7 @@ your-repo/
   <label title="Agentic means Claude doesn't just suggest code — it reads files, runs commands, creates branches, writes code, and iterates autonomously. You describe what; it figures out how."><input type="checkbox" /><span>I can explain what makes Claude Code <strong>agentic</strong> vs. autocomplete and chat tools.</span></label>
   <label title="CLAUDE.md is a markdown file at your project root that Claude reads every session — your project's persistent memory for conventions, architecture, and standards."><input type="checkbox" /><span>I understand what <strong>CLAUDE.md</strong> is and why it matters.</span></label>
   <label title="/clear wipes history and starts fresh. /plan switches to plan mode so Claude thinks before building. /stats shows your session's usage patterns."><input type="checkbox" /><span>I know what <strong>/clear</strong>, <strong>/plan</strong>, and <strong>/stats</strong> do.</span></label>
+  <label title="By default, Claude can read files freely but asks before writing files, editing code, or running commands. You can allowlist safe operations in .claude/settings.json to reduce prompting friction."><input type="checkbox" /><span>I understand Claude Code's <strong>permission model</strong> — it asks before acting, and you can allowlist safe operations.</span></label>
   <label title="Commands are prompt templates you trigger manually with slash commands (e.g. /prime-context). Skills are discovered and used by Claude automatically when relevant — no slash needed. Both live as markdown in .claude/ and are version controlled."><input type="checkbox" /><span>I know the difference between <strong>skills</strong> and <strong>commands</strong> in Claude Code.</span></label>
 </div>
 
