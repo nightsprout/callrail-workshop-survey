@@ -51,12 +51,13 @@
       <li><a href="#steering-and-summoning">Steering</a></li>
       <li><a href="#skills-commands-extending">Commands &amp; Skills</a></li>
       <li><a href="#when-things-go-wrong">When It Breaks</a></li>
-      <li><a href="#readiness-checklist">Readiness Checklist</a></li>
-      <li style="margin-top:12px;font-size:11px;color:var(--brand-teal);opacity:0.7;letter-spacing:0.04em;text-transform:uppercase;">Optional</li>
       <li><a href="#the-landscape">The Landscape</a></li>
       <li><a href="#glossary">Glossary</a></li>
+      <li style="margin-top:12px;font-size:11px;color:var(--brand-teal);opacity:0.7;letter-spacing:0.04em;text-transform:uppercase;">Optional</li>
+      <li><a href="#readiness-checklist">Readiness Checklist</a></li>
       <li><a href="#optional-install">Installation</a></li>
       <li><a href="#optional-video">Video</a></li>
+      <li><a href="#optional-links">Useful Links</a></li>
     </ol>
   </div>
 </nav>
@@ -753,56 +754,6 @@ your-repo/
 </section>
 
 <!-- ============================================ -->
-<!-- READINESS CHECKLIST                          -->
-<!-- ============================================ -->
-
-<section id="readiness-checklist">
-<h2>Readiness Checklist</h2>
-
-<p>Before the workshop, you should be comfortable with these concepts. You don't need to have them memorized — just familiar enough that they're not brand new when they come up.</p>
-
-<div class="checklist">
-  <label title="Tokens are subword units (~4 chars each) — a compression sweet spot between characters and whole words. The context window (~200K tokens, 1M announced) is Claude's working memory. The entire history rides with every message, so longer conversations burn more tokens and get worse."><input type="checkbox" /><span>I understand what <strong>tokens</strong> are, what the <strong>context window</strong> is, and why longer conversations degrade.</span></label>
-  <label title="claude.ai is the browser chat. Claude Code is the terminal coding agent. The Claude API is pay-per-token and separate. Claude Code and claude.ai share a subscription."><input type="checkbox" /><span>I know the difference between <strong>claude.ai</strong>, <strong>Claude Code</strong>, and the <strong>Claude API</strong>.</span></label>
-  <label title="Agentic means Claude doesn't just suggest code — it reads files, runs commands, creates branches, writes code, and iterates autonomously. You describe what; it figures out how."><input type="checkbox" /><span>I can explain what makes Claude Code <strong>agentic</strong> vs. autocomplete and chat tools.</span></label>
-  <label title="CLAUDE.md is a markdown file at your project root that Claude reads every session — your project's persistent memory for conventions, architecture, and standards."><input type="checkbox" /><span>I understand what <strong>CLAUDE.md</strong> is and why it matters.</span></label>
-  <label title="/clear wipes history and starts fresh. /plan switches to plan mode so Claude thinks before building. /stats shows your session's usage patterns."><input type="checkbox" /><span>I know what <strong>/clear</strong>, <strong>/plan</strong>, and <strong>/stats</strong> do.</span></label>
-  <label title="Commands are prompt templates you trigger manually with slash commands (e.g. /prime-context). Skills are discovered and used by Claude automatically when relevant — no slash needed. Both live as markdown in .claude/ and are version controlled."><input type="checkbox" /><span>I know the difference between <strong>skills</strong> and <strong>commands</strong> in Claude Code.</span></label>
-</div>
-
-<p>If any of these feel unclear, re-read the relevant section above — or ask Claude! One of the best ways to learn about Claude is to use Claude.</p>
-
-<h3 id="optional-install">Optional: install ahead of time</h3>
-
-<p>If you want to install these tools and try the basics out before the workshop:</p>
-
-<ul>
-  <li><a href="https://docs.anthropic.com/en/docs/claude-code/getting-started" target="_blank" rel="noopener">Claude Code (CLI)</a> — terminal-based, what we'll primarily use in the workshop</li>
-  <li><a href="https://claude.ai/download" target="_blank" rel="noopener">Claude Desktop App</a> — native app with Chat, Cowork, and Code modes</li>
-  <li><a href="https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code" target="_blank" rel="noopener">Claude Code for VS Code</a> — Claude Code embedded in your editor</li>
-</ul>
-
-<h3 id="optional-video">Optional: crash course video</h3>
-
-<p>This 18-minute talk isn't engineering-specific — it covers the mentality of working with AI effectively and introduces the "intelligence gym," a framework for building your AI collaboration skills:</p>
-
-<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:24px 0;border-radius:12px;">
-  <iframe src="https://www.youtube.com/embed/A8_nNYLTXEQ" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
-</div>
-
-<h3>Useful links</h3>
-
-<ul>
-  <li><a href="https://docs.anthropic.com/en/docs/claude-code/overview" target="_blank" rel="noopener">Claude Code Documentation</a> — official docs covering setup, usage, and configuration</li>
-  <li><a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering" target="_blank" rel="noopener">Anthropic Prompt Engineering Guide</a> — best practices for getting better results</li>
-  <li><a href="https://github.com/ComposioHQ/awesome-claude-skills" target="_blank" rel="noopener">Awesome Claude Skills</a> — community-curated collection of commands, skills, and workflows</li>
-  <li><a href="https://status.anthropic.com" target="_blank" rel="noopener">Anthropic Status</a> — check here when Claude is down or degraded</li>
-</ul>
-
-<p><strong>See you at the workshop.</strong></p>
-</section>
-
-<!-- ============================================ -->
 <!-- SECTION: The Landscape                       -->
 <!-- ============================================ -->
 
@@ -926,6 +877,56 @@ your-repo/
   <dt>/init</dt>
   <dd>Reads your codebase and generates a starter CLAUDE.md. A first draft — the real value comes from human curation.</dd>
 </dl>
+</section>
+
+<!-- ============================================ -->
+<!-- READINESS CHECKLIST                          -->
+<!-- ============================================ -->
+
+<section id="readiness-checklist">
+<h2>Readiness Checklist</h2>
+
+<p>Before the workshop, you should be comfortable with these concepts. You don't need to have them memorized — just familiar enough that they're not brand new when they come up.</p>
+
+<div class="checklist">
+  <label title="Tokens are subword units (~4 chars each) — a compression sweet spot between characters and whole words. The context window (~200K tokens, 1M announced) is Claude's working memory. The entire history rides with every message, so longer conversations burn more tokens and get worse."><input type="checkbox" /><span>I understand what <strong>tokens</strong> are, what the <strong>context window</strong> is, and why longer conversations degrade.</span></label>
+  <label title="claude.ai is the browser chat. Claude Code is the terminal coding agent. The Claude API is pay-per-token and separate. Claude Code and claude.ai share a subscription."><input type="checkbox" /><span>I know the difference between <strong>claude.ai</strong>, <strong>Claude Code</strong>, and the <strong>Claude API</strong>.</span></label>
+  <label title="Agentic means Claude doesn't just suggest code — it reads files, runs commands, creates branches, writes code, and iterates autonomously. You describe what; it figures out how."><input type="checkbox" /><span>I can explain what makes Claude Code <strong>agentic</strong> vs. autocomplete and chat tools.</span></label>
+  <label title="CLAUDE.md is a markdown file at your project root that Claude reads every session — your project's persistent memory for conventions, architecture, and standards."><input type="checkbox" /><span>I understand what <strong>CLAUDE.md</strong> is and why it matters.</span></label>
+  <label title="/clear wipes history and starts fresh. /plan switches to plan mode so Claude thinks before building. /stats shows your session's usage patterns."><input type="checkbox" /><span>I know what <strong>/clear</strong>, <strong>/plan</strong>, and <strong>/stats</strong> do.</span></label>
+  <label title="Commands are prompt templates you trigger manually with slash commands (e.g. /prime-context). Skills are discovered and used by Claude automatically when relevant — no slash needed. Both live as markdown in .claude/ and are version controlled."><input type="checkbox" /><span>I know the difference between <strong>skills</strong> and <strong>commands</strong> in Claude Code.</span></label>
+</div>
+
+<p>If any of these feel unclear, re-read the relevant section above — or ask Claude! One of the best ways to learn about Claude is to use Claude.</p>
+
+<h3 id="optional-install">Optional: install ahead of time</h3>
+
+<p>If you want to install these tools and try the basics out before the workshop:</p>
+
+<ul>
+  <li><a href="https://docs.anthropic.com/en/docs/claude-code/getting-started" target="_blank" rel="noopener">Claude Code (CLI)</a> — terminal-based, what we'll primarily use in the workshop</li>
+  <li><a href="https://claude.ai/download" target="_blank" rel="noopener">Claude Desktop App</a> — native app with Chat, Cowork, and Code modes</li>
+  <li><a href="https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code" target="_blank" rel="noopener">Claude Code for VS Code</a> — Claude Code embedded in your editor</li>
+</ul>
+
+<h3 id="optional-video">Optional: crash course video</h3>
+
+<p>This 18-minute talk isn't engineering-specific — it covers the mentality of working with AI effectively and introduces the "intelligence gym," a framework for building your AI collaboration skills:</p>
+
+<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:24px 0;border-radius:12px;">
+  <iframe src="https://www.youtube.com/embed/A8_nNYLTXEQ" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+</div>
+
+<h3 id="optional-links">Useful links</h3>
+
+<ul>
+  <li><a href="https://docs.anthropic.com/en/docs/claude-code/overview" target="_blank" rel="noopener">Claude Code Documentation</a> — official docs covering setup, usage, and configuration</li>
+  <li><a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering" target="_blank" rel="noopener">Anthropic Prompt Engineering Guide</a> — best practices for getting better results</li>
+  <li><a href="https://github.com/ComposioHQ/awesome-claude-skills" target="_blank" rel="noopener">Awesome Claude Skills</a> — community-curated collection of commands, skills, and workflows</li>
+  <li><a href="https://status.anthropic.com" target="_blank" rel="noopener">Anthropic Status</a> — check here when Claude is down or degraded</li>
+</ul>
+
+<p><strong>See you at the workshop.</strong></p>
 </section>
 
 </div><!-- .page-main -->
