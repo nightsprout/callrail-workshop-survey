@@ -83,11 +83,13 @@
 
 <p>Tokens matter because they're what you're paying for. Every file Claude reads, every command output it processes, every response it writes — all tokens. A long conversation isn't just slower, it's literally more expensive per message, because the <em>entire conversation history</em> rides along with every new message you send.</p>
 
-<h3>AI starts blank every time</h3>
+<h3>AI mostly starts blank every time</h3>
 
-<p>This is the single most important thing to understand. Claude doesn't remember your last conversation. It doesn't know what you worked on yesterday. Every new session starts from zero — a blank slate with no memory of anything that came before.</p>
+<p>This is the single most important thing to understand. Claude doesn't remember the details of your last conversation. It doesn't know what you worked on yesterday. Every new session starts mostly from zero.</p>
 
-<p>Everything Claude knows in a given conversation comes from what's been injected into that conversation's <strong>context window</strong> — the working memory for that session.</p>
+<p>The exception: Claude Code keeps a lightweight <strong>memory</strong> across sessions — things like your preferences, project patterns it's noticed, and corrections you've made. These get automatically injected into new conversations so you don't have to repeat yourself on the basics. But this memory is thin — it's not recalling your full conversation history, just key facts it decided were worth remembering.</p>
+
+<p>Beyond that, everything Claude knows in a given conversation comes from what's been injected into that conversation's <strong>context window</strong> — the working memory for that session.</p>
 
 <div class="callout term">
   <strong>Context window</strong> — The total amount of text AI can hold in working memory for a single conversation. Claude's is roughly 200,000 tokens. Bigger isn't always better — what matters is what's <em>in</em> the window.
