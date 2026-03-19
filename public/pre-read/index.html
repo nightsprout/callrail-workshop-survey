@@ -51,10 +51,10 @@
       <li><a href="#steering-and-summoning">Steering</a></li>
       <li><a href="#skills-commands-extending">Commands &amp; Skills</a></li>
       <li><a href="#when-things-go-wrong">When It Breaks</a></li>
+      <li><a href="#readiness-checklist">Readiness Checklist</a></li>
       <li style="margin-top:12px;font-size:11px;color:var(--brand-teal);opacity:0.7;letter-spacing:0.04em;text-transform:uppercase;">Optional</li>
       <li><a href="#the-landscape">The Landscape</a></li>
       <li><a href="#glossary">Glossary</a></li>
-      <li><a href="#readiness-checklist">Readiness Checklist</a></li>
     </ol>
   </div>
 </nav>
@@ -76,36 +76,43 @@
 
 <p>If you're coming from ChatGPT, one thing might surprise you: how much everything in Claude — and AI engineering broadly — revolves around <strong>tokens</strong>. Token limits. Token costs. Context tokens. Output tokens. The word comes up constantly because tokens are the fundamental unit of everything happening under the hood. Understanding them at an engineering level makes everything else click.</p>
 
-<h3>What tokens actually are (and why)</h3>
+<h3>It starts with tokens</h3>
 
-<p>AI doesn't read characters or words. It reads <strong>tokens</strong> — subword units that represent a deliberate engineering tradeoff. If you've ever thought about text encoding or compression, the reasoning will feel familiar.</p>
+<p>AI doesn't read words the way you do. It breaks everything down into <strong>tokens</strong> — fragments of text, roughly three-quarters of a word each. The word "development" is 2 tokens. "CallRail" is 2 tokens. A short paragraph might be 50 tokens. A full source file could be thousands.</p>
 
-<p>Consider three approaches to chunking text for a neural network:</p>
+<div class="callout term">
+  <strong>Token</strong> — The smallest unit of text AI processes. Roughly ¾ of a word (~4 characters). Everything you send, everything AI reads, everything it generates — all measured in tokens.
+</div>
+
+<details class="advanced-read">
+<summary>Advanced: How tokenization actually works</summary>
+<div class="advanced-read__content">
+
+<p>Tokens are <strong>subword units</strong> — a deliberate engineering tradeoff. If you've ever thought about text encoding or compression, the reasoning will feel familiar.</p>
 
 <table>
   <thead>
     <tr><th>Approach</th><th>Vocabulary size</th><th>Tradeoff</th></tr>
   </thead>
   <tbody>
-    <tr><td><strong>Characters</strong></td><td>~256 entries</td><td>Tiny vocabulary, but "function" takes 8 tokens. Sequences get unmanageably long, and the model has to learn what letters mean when grouped — like reading letter-by-letter instead of words.</td></tr>
-    <tr><td><strong>Whole words</strong></td><td>Millions</td><td>"run", "runs", "running", "runner" each need their own entry. Add code identifiers, proper nouns, compound words — the dictionary explodes and you still can't handle words you've never seen.</td></tr>
-    <tr><td><strong>Subwords</strong></td><td>~100K entries</td><td>The sweet spot. Common words like "the" are one token. Less common words split intelligently: "tokenization" → "token" + "ization". Manageable dictionary that can represent any text.</td></tr>
+    <tr><td><strong>Characters</strong></td><td>~256 entries</td><td>Tiny vocabulary, but "function" takes 8 tokens. Sequences get unmanageably long — like reading letter-by-letter.</td></tr>
+    <tr><td><strong>Whole words</strong></td><td>Millions</td><td>"run", "runs", "running", "runner" each need their own entry. The dictionary explodes and can't handle words it's never seen.</td></tr>
+    <tr><td><strong>Subwords</strong></td><td>~100K entries</td><td>The sweet spot. Common words like "the" are one token. Less common words split: "tokenization" → "token" + "ization". Handles any text.</td></tr>
   </tbody>
 </table>
 
-<p>Modern LLMs use <strong>subword tokenization</strong> — usually a variant of Byte Pair Encoding (BPE). The algorithm scans a massive training corpus, finds the most frequent character pairs, and iteratively merges them into single tokens. The result: common patterns — English words, code keywords, frequent prefixes and suffixes — get compact, single-token representations, while rare strings decompose into smaller pieces the model already knows.</p>
+<p>Modern LLMs use <strong>Byte Pair Encoding (BPE)</strong> — an algorithm that scans a massive training corpus, finds the most frequent character pairs, and iteratively merges them into single tokens. Common patterns get compact representations; rare strings decompose into smaller known pieces.</p>
 
 <p>A few things useful to know as an engineer:</p>
 
 <ul>
-  <li><strong>Code tokenizes differently than prose.</strong> Common keywords like <code>function</code>, <code>return</code>, and <code>import</code> are often single tokens. But your variable names and domain-specific identifiers get split. Whitespace and indentation cost tokens too — one reason minified code is cheaper to process.</li>
-  <li><strong>Non-English text burns more tokens.</strong> The training corpus is English-heavy, so English words get the most efficient encodings. CJK characters, Cyrillic, and emoji all cost more tokens for the same semantic content.</li>
-  <li><strong>The ¾ rule of thumb.</strong> For English prose, 1 token ≈ 4 characters ≈ ¾ of a word. "CallRail" is 2 tokens. A short paragraph is ~50 tokens. A full source file could be thousands.</li>
+  <li><strong>Code tokenizes differently than prose.</strong> Keywords like <code>function</code> and <code>return</code> are often single tokens. Variable names get split. Whitespace and indentation cost tokens too — one reason minified code is cheaper to process.</li>
+  <li><strong>Non-English text burns more tokens.</strong> English words get the most efficient encodings. CJK characters, Cyrillic, and emoji all cost more tokens for the same semantic content.</li>
+  <li><strong>Tokenization is why AI miscounts.</strong> It doesn't "see" individual letters — it sees subword chunks. This is why it sometimes struggles with character-level tasks like counting letters in a word.</li>
 </ul>
 
-<div class="callout term">
-  <strong>Token</strong> — A subword unit, typically 3–4 characters of English text. The model's native unit of input and output. Everything — prompts, file reads, generated code — is measured in tokens. Tokenization is also why AI sometimes splits words oddly or miscounts characters: it doesn't "see" individual letters.
 </div>
+</details>
 
 <p>Tokens matter because they're what you're paying for. Every file Claude reads, every command output it processes, every response it writes — all tokens. A long conversation isn't just slower, it's literally more expensive per message, because the <em>entire conversation history</em> rides along with every new message you send.</p>
 
@@ -127,11 +134,43 @@
   <strong>Context</strong> — Everything the AI can "see" during a conversation: your messages, its responses, files it's read, command outputs. More context isn't always better — focused, relevant context beats a massive dump.
 </div>
 
+<details class="advanced-read">
+<summary>Advanced: Why the middle gets lost</summary>
+<div class="advanced-read__content">
+
+<p>LLMs use an <strong>attention mechanism</strong> — each token "attends to" every other token in the context window to decide what's relevant. In theory, attention can reach anywhere. In practice, models develop a strong bias toward the beginning (system prompt, initial instructions) and end (most recent messages) of the context.</p>
+
+<p>This has real implications for how you work:</p>
+
+<ul>
+  <li><strong>CLAUDE.md loads at the top</strong> — it's in the highest-attention zone, which is why it's so effective for persistent instructions.</li>
+  <li><strong>Your latest message is at the bottom</strong> — also high attention. This is why restating your goal in follow-up messages helps.</li>
+  <li><strong>Message 15 of a 30-message conversation?</strong> That's the dead zone. Critical details from early-middle conversation turns get effectively forgotten.</li>
+</ul>
+
+<p>This is also why <code>/clear</code> and starting fresh is so powerful — it's not just about token cost, it's about moving important context back into the high-attention zones.</p>
+
+</div>
+</details>
+
 <h3>Generation is prediction</h3>
 
 <p>When Claude writes a response, it's not retrieving answers from a database. It's predicting the next token, one at a time, based on patterns learned during training. This is why the same prompt can produce different outputs — it's probabilistic, not deterministic. It's also why giving Claude better context produces better outputs. More signal, less noise, better predictions.</p>
 
 <p>That's the whole loop: <strong>tokens in → context window → prediction out</strong>. Everything else we'll cover — managing context, CLAUDE.md, plan mode, steering — is about optimizing this loop.</p>
+
+<details class="advanced-read">
+<summary>Advanced: Temperature and why outputs vary</summary>
+<div class="advanced-read__content">
+
+<p>At each step, the model doesn't pick one "right" next token — it generates a probability distribution across its entire vocabulary. The word after "the dog sat on the" might be "mat" (35%), "floor" (20%), "couch" (12%), "ground" (8%), and so on.</p>
+
+<p><strong>Temperature</strong> controls how this distribution gets sampled. Low temperature (closer to 0) makes the model pick the highest-probability token almost every time — more deterministic, more conservative. High temperature spreads the probability more evenly — more creative, more unpredictable, more likely to hallucinate.</p>
+
+<p>Claude Code uses carefully tuned temperature settings you don't need to adjust. But understanding this helps explain why the same prompt can produce different code on different runs — and why "regenerate" sometimes gives you a better answer.</p>
+
+</div>
+</details>
 </section>
 
 <!-- ============================================ -->
@@ -491,6 +530,23 @@ your-repo/
 <div class="callout term">
   <strong>/init</strong> — A Claude Code command that reads your codebase and generates a starter CLAUDE.md. It examines your project structure, README, configs, and dependencies to create a first draft. The real value comes from human curation — the generated file is a starting point, not the finished product.
 </div>
+
+<details class="advanced-read">
+<summary>Advanced: The token cost of CLAUDE.md</summary>
+<div class="advanced-read__content">
+
+<p>Every line of CLAUDE.md gets loaded into the context window at the start of every conversation — and it rides along with <em>every single message</em>. A 500-line CLAUDE.md might be 2,000+ tokens. Over a 30-message conversation, that's 60,000 tokens just for CLAUDE.md alone.</p>
+
+<p>This creates a tradeoff: more instructions means better-informed Claude, but also means less room for actual work and higher costs per message. Best practices:</p>
+
+<ul>
+  <li><strong>Keep CLAUDE.md under ~200 lines.</strong> Enough for critical conventions, not a novel.</li>
+  <li><strong>Use <code>docs/</code> for deep reference.</strong> Put your architecture docs, glossary, and API contracts in separate files. Claude reads these on-demand when it navigates into that code — they don't load every conversation.</li>
+  <li><strong>Subdirectory CLAUDE.md files only load when relevant.</strong> A <code>frontend/CLAUDE.md</code> only enters the context when Claude is working in the frontend directory. Use this to scope heavy instructions.</li>
+</ul>
+
+</div>
+</details>
 </section>
 
 <!-- ============================================ -->
@@ -695,6 +751,56 @@ your-repo/
 </section>
 
 <!-- ============================================ -->
+<!-- READINESS CHECKLIST                          -->
+<!-- ============================================ -->
+
+<section id="readiness-checklist">
+<h2>Readiness Checklist</h2>
+
+<p>Before the workshop, you should be comfortable with these concepts. You don't need to have them memorized — just familiar enough that they're not brand new when they come up.</p>
+
+<div class="checklist">
+  <label title="Tokens are subword units (~4 chars each) — a compression sweet spot between characters and whole words. The context window (~200K tokens, 1M announced) is Claude's working memory. The entire history rides with every message, so longer conversations burn more tokens and get worse."><input type="checkbox" /><span>I understand what <strong>tokens</strong> are, what the <strong>context window</strong> is, and why longer conversations degrade.</span></label>
+  <label title="claude.ai is the browser chat. Claude Code is the terminal coding agent. The Claude API is pay-per-token and separate. Claude Code and claude.ai share a subscription."><input type="checkbox" /><span>I know the difference between <strong>claude.ai</strong>, <strong>Claude Code</strong>, and the <strong>Claude API</strong>.</span></label>
+  <label title="Agentic means Claude doesn't just suggest code — it reads files, runs commands, creates branches, writes code, and iterates autonomously. You describe what; it figures out how."><input type="checkbox" /><span>I can explain what makes Claude Code <strong>agentic</strong> vs. autocomplete and chat tools.</span></label>
+  <label title="CLAUDE.md is a markdown file at your project root that Claude reads every session — your project's persistent memory for conventions, architecture, and standards."><input type="checkbox" /><span>I understand what <strong>CLAUDE.md</strong> is and why it matters.</span></label>
+  <label title="/clear wipes history and starts fresh. /plan switches to plan mode so Claude thinks before building. /stats shows your session's usage patterns."><input type="checkbox" /><span>I know what <strong>/clear</strong>, <strong>/plan</strong>, and <strong>/stats</strong> do.</span></label>
+  <label title="Commands are prompt templates you trigger manually with slash commands (e.g. /prime-context). Skills are discovered and used by Claude automatically when relevant — no slash needed. Both live as markdown in .claude/ and are version controlled."><input type="checkbox" /><span>I know the difference between <strong>skills</strong> and <strong>commands</strong> in Claude Code.</span></label>
+</div>
+
+<p>If any of these feel unclear, re-read the relevant section above — or ask Claude! One of the best ways to learn about Claude is to use Claude.</p>
+
+<h3>Optional: install ahead of time</h3>
+
+<p>If you want to install these tools and try the basics out before the workshop:</p>
+
+<ul>
+  <li><a href="https://docs.anthropic.com/en/docs/claude-code/getting-started" target="_blank" rel="noopener">Claude Code (CLI)</a> — terminal-based, what we'll primarily use in the workshop</li>
+  <li><a href="https://claude.ai/download" target="_blank" rel="noopener">Claude Desktop App</a> — native app with Chat, Cowork, and Code modes</li>
+  <li><a href="https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code" target="_blank" rel="noopener">Claude Code for VS Code</a> — Claude Code embedded in your editor</li>
+</ul>
+
+<h3>Optional: crash course video</h3>
+
+<p>This 18-minute talk isn't engineering-specific — it covers the mentality of working with AI effectively and introduces the "intelligence gym," a framework for building your AI collaboration skills:</p>
+
+<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:24px 0;border-radius:12px;">
+  <iframe src="https://www.youtube.com/embed/A8_nNYLTXEQ" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+</div>
+
+<h3>Useful links</h3>
+
+<ul>
+  <li><a href="https://docs.anthropic.com/en/docs/claude-code/overview" target="_blank" rel="noopener">Claude Code Documentation</a> — official docs covering setup, usage, and configuration</li>
+  <li><a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering" target="_blank" rel="noopener">Anthropic Prompt Engineering Guide</a> — best practices for getting better results</li>
+  <li><a href="https://github.com/ComposioHQ/awesome-claude-skills" target="_blank" rel="noopener">Awesome Claude Skills</a> — community-curated collection of commands, skills, and workflows</li>
+  <li><a href="https://status.anthropic.com" target="_blank" rel="noopener">Anthropic Status</a> — check here when Claude is down or degraded</li>
+</ul>
+
+<p><strong>See you at the workshop.</strong></p>
+</section>
+
+<!-- ============================================ -->
 <!-- SECTION: The Landscape                       -->
 <!-- ============================================ -->
 
@@ -818,56 +924,6 @@ your-repo/
   <dt>/init</dt>
   <dd>Reads your codebase and generates a starter CLAUDE.md. A first draft — the real value comes from human curation.</dd>
 </dl>
-</section>
-
-<!-- ============================================ -->
-<!-- READINESS CHECKLIST                          -->
-<!-- ============================================ -->
-
-<section id="readiness-checklist">
-<h2>Readiness Checklist</h2>
-
-<p>Before the workshop, you should be comfortable with these concepts. You don't need to have them memorized — just familiar enough that they're not brand new when they come up.</p>
-
-<div class="checklist">
-  <label title="Tokens are subword units (~4 chars each) created by Byte Pair Encoding — a compression sweet spot between characters and whole words. The context window (~200K tokens, 1M announced) is Claude's working memory. The entire history rides with every message, so longer conversations burn more tokens and get worse."><input type="checkbox" /><span>I understand what <strong>tokens</strong> are, what the <strong>context window</strong> is, and why longer conversations degrade.</span></label>
-  <label title="claude.ai is the browser chat. Claude Code is the terminal coding agent. The Claude API is pay-per-token and separate. Claude Code and claude.ai share a subscription."><input type="checkbox" /><span>I know the difference between <strong>claude.ai</strong>, <strong>Claude Code</strong>, and the <strong>Claude API</strong>.</span></label>
-  <label title="Agentic means Claude doesn't just suggest code — it reads files, runs commands, creates branches, writes code, and iterates autonomously. You describe what; it figures out how."><input type="checkbox" /><span>I can explain what makes Claude Code <strong>agentic</strong> vs. autocomplete and chat tools.</span></label>
-  <label title="CLAUDE.md is a markdown file at your project root that Claude reads every session — your project's persistent memory for conventions, architecture, and standards."><input type="checkbox" /><span>I understand what <strong>CLAUDE.md</strong> is and why it matters.</span></label>
-  <label title="/clear wipes history and starts fresh. /plan switches to plan mode so Claude thinks before building. /stats shows your session's usage patterns."><input type="checkbox" /><span>I know what <strong>/clear</strong>, <strong>/plan</strong>, and <strong>/stats</strong> do.</span></label>
-  <label title="Commands are prompt templates you trigger manually with slash commands (e.g. /prime-context). Skills are discovered and used by Claude automatically when relevant — no slash needed. Both live as markdown in .claude/ and are version controlled."><input type="checkbox" /><span>I know the difference between <strong>skills</strong> and <strong>commands</strong> in Claude Code.</span></label>
-</div>
-
-<p>If any of these feel unclear, re-read the relevant section above — or ask Claude! One of the best ways to learn about Claude is to use Claude.</p>
-
-<h3>Optional: install ahead of time</h3>
-
-<p>If you want to install these tools and try the basics out before the workshop:</p>
-
-<ul>
-  <li><a href="https://docs.anthropic.com/en/docs/claude-code/getting-started" target="_blank" rel="noopener">Claude Code (CLI)</a> — terminal-based, what we'll primarily use in the workshop</li>
-  <li><a href="https://claude.ai/download" target="_blank" rel="noopener">Claude Desktop App</a> — native app with Chat, Cowork, and Code modes</li>
-  <li><a href="https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code" target="_blank" rel="noopener">Claude Code for VS Code</a> — Claude Code embedded in your editor</li>
-</ul>
-
-<h3>Optional: crash course video</h3>
-
-<p>This 18-minute talk isn't engineering-specific — it covers the mentality of working with AI effectively and introduces the "intelligence gym," a framework for building your AI collaboration skills:</p>
-
-<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:24px 0;border-radius:12px;">
-  <iframe src="https://www.youtube.com/embed/A8_nNYLTXEQ" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
-</div>
-
-<h3>Useful links</h3>
-
-<ul>
-  <li><a href="https://docs.anthropic.com/en/docs/claude-code/overview" target="_blank" rel="noopener">Claude Code Documentation</a> — official docs covering setup, usage, and configuration</li>
-  <li><a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering" target="_blank" rel="noopener">Anthropic Prompt Engineering Guide</a> — best practices for getting better results</li>
-  <li><a href="https://github.com/ComposioHQ/awesome-claude-skills" target="_blank" rel="noopener">Awesome Claude Skills</a> — community-curated collection of commands, skills, and workflows</li>
-  <li><a href="https://status.anthropic.com" target="_blank" rel="noopener">Anthropic Status</a> — check here when Claude is down or degraded</li>
-</ul>
-
-<p><strong>See you at the workshop.</strong></p>
 </section>
 
 </div><!-- .page-main -->

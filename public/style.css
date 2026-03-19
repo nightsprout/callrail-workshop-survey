@@ -1178,6 +1178,64 @@ a.card:hover {
 }
 
 /* ==========================================================================
+   Advanced Read (disclosure panels)
+   ========================================================================== */
+
+.advanced-read {
+  margin: 24px 0;
+  border: 1px solid rgba(0, 125, 138, 0.2);
+  border-radius: 8px;
+  background: rgba(0, 53, 59, 0.02);
+}
+
+.advanced-read summary {
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--brand-teal);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+  list-style: none;
+}
+
+.advanced-read summary::-webkit-details-marker { display: none; }
+
+.advanced-read summary::before {
+  content: "▸ ";
+  color: var(--brand-green);
+  font-size: 13px;
+}
+
+.advanced-read[open] summary::before {
+  content: "▾ ";
+}
+
+.advanced-read summary:hover {
+  background: rgba(0, 53, 59, 0.04);
+}
+
+.advanced-read[open] summary {
+  border-bottom: 1px solid rgba(0, 125, 138, 0.15);
+}
+
+.advanced-read .advanced-read__content {
+  padding: 16px 20px;
+}
+
+.advanced-read .advanced-read__content > *:first-child {
+  margin-top: 0;
+}
+
+.advanced-read .advanced-read__content > *:last-child {
+  margin-bottom: 0;
+}
+
+.advanced-read table {
+  font-size: 14px;
+}
+
+/* ==========================================================================
    Responsive
    ========================================================================== */
 
