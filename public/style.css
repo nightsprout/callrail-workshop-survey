@@ -285,6 +285,8 @@ pre {
   padding: 20px 24px;
   border-radius: 8px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
   margin: 24px 0;
 }
 
@@ -1218,8 +1220,28 @@ a.card:hover {
   .hero--small h1 { font-size: 28px; }
   .hero--small p { font-size: 15px; }
 
+  .page-header__inner {
+    flex-wrap: wrap;
+  }
+
   .page-header__title {
     font-size: 16px;
+  }
+
+  .page-header__nav {
+    gap: 12px;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  pre {
+    padding: 16px 12px;
+    font-size: 12px;
+  }
+
+  .checklist label {
+    gap: 8px;
+    font-size: 14px;
   }
 }
 
