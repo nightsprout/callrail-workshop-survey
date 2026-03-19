@@ -6,6 +6,14 @@
   <title>What You Need to Know Before the Workshop — Claude Code Workshop</title>
   <link rel="icon" type="image/png" href="../logos/logo-symbol.png" />
   <link rel="stylesheet" href="../style.css">
+  <style>
+    .page-sidebar a.active {
+      background: rgba(0, 206, 124, 0.1);
+      color: var(--brand-dark-blue);
+      border-left-color: var(--brand-green);
+      font-weight: 700;
+    }
+  </style>
 </head>
 <body>
 <div class="page-wrapper">
@@ -315,6 +323,7 @@
     <tr><td><code>/plan</code></td><td>Switches to plan mode — Claude explores and proposes before writing code</td><td>Complex tasks, unfamiliar code, before context gets heavy</td></tr>
     <tr><td><code>/stats</code></td><td>Shows session usage patterns and how close you are to limits</td><td>Checking if a conversation is getting expensive</td></tr>
     <tr><td><code>/resume</code></td><td>Picks up a previous conversation where you left off</td><td>Returning to work after a break or a <code>/clear</code></td></tr>
+    <tr><td><code>/exit</code></td><td>Gracefully ends the Claude Code session</td><td>Done working, or switching to a different project</td></tr>
   </tbody>
 </table>
 
@@ -686,5 +695,27 @@ your-repo/
     </div>
   </footer>
 </div>
+<script>
+(function() {
+  var links = document.querySelectorAll('.page-sidebar a');
+  var sections = [];
+  links.forEach(function(a) {
+    var id = a.getAttribute('href').replace('#', '');
+    var el = document.getElementById(id);
+    if (el) sections.push({ id: id, el: el, link: a });
+  });
+  function update() {
+    var scrollY = window.scrollY + 120;
+    var current = sections[0];
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i].el.offsetTop <= scrollY) current = sections[i];
+    }
+    links.forEach(function(a) { a.classList.remove('active'); });
+    if (current) current.link.classList.add('active');
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+</script>
 </body>
 </html>
