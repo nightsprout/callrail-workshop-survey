@@ -40,7 +40,7 @@
   <div class="page-sidebar__inner">
     <strong class="page-sidebar__title">Contents</strong>
     <ol>
-      <li><a href="#how-ai-works">How AI Works</a></li>
+      <li><a href="#how-ai-works">Mental Model</a></li>
       <li><a href="#meet-claude">Meet Claude</a></li>
       <li><a href="#what-makes-cc-different">Claude Code</a></li>
       <li><a href="#talking-to-claude">Talking to Claude</a></li>
@@ -65,7 +65,7 @@
 <!-- ============================================ -->
 
 <section id="how-ai-works">
-<h2>1. How AI Actually Works</h2>
+<h2>1. The Mental Model</h2>
 
 <aside class="section-image">
   <img src="../images/slides/how-ai-works-square.jpg" alt="Illustration: token fragments flowing into a funnel, single droplet emerging" />
@@ -92,7 +92,7 @@
 <p>Beyond that, everything Claude knows in a given conversation comes from what's been injected into that conversation's <strong>context window</strong> — the working memory for that session.</p>
 
 <div class="callout term">
-  <strong>Context window</strong> — The total amount of text AI can hold in working memory for a single conversation. Claude's is roughly 200,000 tokens. Bigger isn't always better — what matters is what's <em>in</em> the window.
+  <strong>Context window</strong> — The total amount of text AI can hold in working memory for a single conversation. Claude's is 200,000 tokens today, with 1,000,000-token windows already announced. Bigger isn't always better — what matters is what's <em>in</em> the window.
 </div>
 
 <p>Your prompt, the conversation history, any files Claude reads, any command outputs — it all lives in the context window. When it fills up, older content starts getting compressed or dropped. And here's the catch: AI is best at remembering what's at the beginning and end of the context window. Stuff in the middle gets hazy — researchers call this the "lost in the middle" problem.</p>
@@ -495,7 +495,7 @@ your-repo/
 <h2>9. Commands, Skills &amp; Extending</h2>
 
 <aside class="section-image">
-  <img src="../images/slides/crash-course/extending-claude-square.jpg" alt="Illustration: glowing root system branching out" />
+  <img src="../images/slides/crash-course/commands-skills-extending-square.jpg" alt="Illustration: T-Rex tinkering at a workbench with tools and modular parts" />
 </aside>
 
 <p>Everything so far has been about Claude's built-in capabilities. But the real power comes when you start customizing Claude for your specific workflows.</p>
@@ -543,6 +543,19 @@ your-repo/
 </div>
 
 <p>Hooks solve a common problem: you kick off a task, switch to something else, and forget to check back. A hook can ping you in Slack when Claude's done.</p>
+
+<h3>Built-in subagents</h3>
+
+<p>Claude Code doesn't just work alone — it can spawn <strong>subagents</strong> to handle parts of a task in parallel. These are lightweight Claude instances that run inside your main session, each focused on a specific job.</p>
+
+<p>Two built-in subagent types you'll see frequently:</p>
+
+<ul>
+  <li><strong>Research agents</strong> — Claude spawns these to explore your codebase or search the web without cluttering your main conversation. They read files, search for patterns, and report back with findings. Useful when Claude needs to understand something before making changes.</li>
+  <li><strong>Task agents</strong> — These handle discrete pieces of work autonomously. Claude might spawn several in parallel to tackle independent subtasks — running tests, checking multiple files, or implementing separate components simultaneously.</li>
+</ul>
+
+<p>You don't need to configure subagents — Claude decides when to use them based on the complexity of your request. But knowing they exist helps you understand why Claude sometimes pauses to "think" before acting: it's coordinating work across multiple agents behind the scenes.</p>
 </section>
 
 <!-- ============================================ -->
@@ -614,7 +627,7 @@ your-repo/
   <dd>Everything the AI can "see" during a conversation: your messages, its responses, files it's read, command outputs.</dd>
 
   <dt>Context window</dt>
-  <dd>The total working memory for a single conversation. Claude's is ~200,000 tokens. What's in the window matters more than how big it is.</dd>
+  <dd>The total working memory for a single conversation. Claude's is ~200,000 tokens today (1M announced). What's in the window matters more than how big it is.</dd>
 
   <dt>Hooks</dt>
   <dd>Your code that runs automatically before or after Claude takes actions — notifications, linting, validation.</dd>
