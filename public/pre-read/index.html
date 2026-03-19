@@ -491,7 +491,7 @@
 <p>We just said AI starts blank every time. So how do you avoid repeating yourself in every conversation? The answer is CLAUDE.md — a markdown file that Claude reads at the start of every session.</p>
 
 <div class="callout term">
-  <strong>CLAUDE.md</strong> — A markdown file at the root of your project that Claude reads automatically at the start of every conversation. It contains project conventions, architecture notes, common patterns, and anything else Claude should know. Think of it as your project's brain.
+  <strong>CLAUDE.md</strong> — A markdown file that Claude reads automatically at the start of every conversation. You can place them at multiple levels — your home directory for personal preferences, your repo root for project conventions, and subdirectories for team-specific patterns. Claude reads them hierarchically as it navigates your code. Think of it as your project's layered brain.
 </div>
 
 <h3>The hierarchy</h3>
@@ -821,7 +821,7 @@ your-repo/
   <dd>Claude Code runs in your terminal, giving it access to your filesystem, git, and every CLI tool you have installed.</dd>
 
   <dt>CLAUDE.md</dt>
-  <dd>A markdown file at the root of your project that Claude reads at the start of every conversation. Your project's persistent memory.</dd>
+  <dd>Markdown files Claude reads automatically — placed at your home directory, repo root, and/or subdirectories. They stack hierarchically to give Claude layered project memory.</dd>
 
   <dt>Context</dt>
   <dd>Everything the AI can "see" during a conversation: your messages, its responses, files it's read, command outputs.</dd>
